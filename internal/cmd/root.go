@@ -1,4 +1,4 @@
-package gcp_terraform_generator
+package cmd
 
 import (
 	"errors"

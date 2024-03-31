@@ -1,9 +1,9 @@
-package gcp_terraform_generator
+package cmd
 
 import (
 	"fmt"
 
-	drawioxml "github.com/joselitofilho/drawio-parser-go/pkg/parser/xml"
+	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/diagram"
 
 	"github.com/spf13/cobra"
 )
@@ -13,7 +13,7 @@ var diagramCmd = &cobra.Command{
 	Use:   "diagram",
 	Short: "Manage Diagram",
 	Run: func(cmd *cobra.Command, _ []string) {
-		diagram, err := cmd.Flags().GetString(flagDiagram)
+		diagramFilename, err := cmd.Flags().GetString(flagDiagram)
 		if err != nil {
 			printErrorAndExit(err)
 		}
@@ -28,46 +28,12 @@ var diagramCmd = &cobra.Command{
 			printErrorAndExit(err)
 		}
 
-		if err := build(diagram, configFile, output); err != nil {
+		if err := diagram.NewDiagram(diagramFilename, configFile, output).Build(); err != nil {
 			printErrorAndExit(err)
 		}
 
 		fmt.Printf("Configuration file '%s' has been generated successfully\n", output)
 	},
-}
-
-func build(diagram, configFile, output string) error {
-	// yamlConfig, err := config.NewYAML(configFile).Parse()
-	// if err != nil {
-	// 	return fmt.Errorf("%w", err)
-	// }
-
-	_, err := drawioxml.Parse(diagram)
-	if err != nil {
-		return fmt.Errorf("%w", err)
-	}
-
-	// resources, err := drawiotoresources.Transform(mxFile)
-	// if err != nil {
-	// 	return fmt.Errorf("%w", err)
-	// }
-
-	// yamlConfigOut, err := resourcestoyaml.NewTransformer(yamlConfig, resources).Transform()
-	// if err != nil {
-	// 	return fmt.Errorf("%w", err)
-	// }
-
-	// data, err := yaml.Marshal(yamlConfigOut)
-	// if err != nil {
-	// 	return fmt.Errorf("%w", err)
-	// }
-
-	// err = os.WriteFile(output, data, os.ModePerm)
-	// if err != nil {
-	// 	return fmt.Errorf("%w", err)
-	// }
-
-	return nil
 }
 
 func init() {
