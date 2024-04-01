@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	drawioxml "github.com/joselitofilho/drawio-parser-go/pkg/parser/xml"
+
+	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/config"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/transformers/drawiotoresources"
 )
 
@@ -18,10 +20,12 @@ func NewDiagram(diagramFilename, configFilename, output string) *Diagram {
 }
 
 func (d *Diagram) Build() error {
-	// yamlConfig, err := config.NewYAML(configFile).Parse()
-	// if err != nil {
-	// 	return fmt.Errorf("%w", err)
-	// }
+	yamlConfig, err := config.NewYAML(d.configFilename).Parse()
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
+	fmt.Println(yamlConfig)
 
 	mxFile, err := drawioxml.Parse(d.diagramFilename)
 	if err != nil {
