@@ -2,11 +2,15 @@ package diagram
 
 import (
 	"fmt"
+	"os"
+
+	"gopkg.in/yaml.v3"
 
 	drawioxml "github.com/joselitofilho/drawio-parser-go/pkg/parser/xml"
 
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/config"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/transformers/drawiotoresources"
+	"github.com/joselitofilho/gcp-terraform-generator/internal/transformers/resourcestoyaml"
 )
 
 type Diagram struct {
@@ -25,8 +29,6 @@ func (d *Diagram) Build() error {
 		return fmt.Errorf("%w", err)
 	}
 
-	fmt.Println(yamlConfig)
-
 	mxFile, err := drawioxml.Parse(d.diagramFilename)
 	if err != nil {
 		return fmt.Errorf("%w", err)
@@ -37,27 +39,20 @@ func (d *Diagram) Build() error {
 		return fmt.Errorf("%w", err)
 	}
 
-	for _, r := range resources.Resources {
-		fmt.Printf("%+v\n", r)
-	}
-	for _, r := range resources.Relationships {
-		fmt.Printf("%+v -> %+v\n", r.Source, r.Target)
+	yamlConfigOut, err := resourcestoyaml.NewTransformer(yamlConfig, resources).Transform()
+	if err != nil {
+		return fmt.Errorf("%w", err)
 	}
 
-	// yamlConfigOut, err := resourcestoyaml.NewTransformer(yamlConfig, resources).Transform()
-	// if err != nil {
-	// 	return fmt.Errorf("%w", err)
-	// }
+	data, err := yaml.Marshal(yamlConfigOut)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
 
-	// data, err := yaml.Marshal(yamlConfigOut)
-	// if err != nil {
-	// 	return fmt.Errorf("%w", err)
-	// }
-
-	// err = os.WriteFile(output, data, os.ModePerm)
-	// if err != nil {
-	// 	return fmt.Errorf("%w", err)
-	// }
+	err = os.WriteFile(d.output, data, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
 
 	return nil
 }

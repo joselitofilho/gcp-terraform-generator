@@ -32,7 +32,7 @@ func TestYAML_Parse(t *testing.T) {
 			setup:  func(_ testing.TB) func(testing.TB) { return func(_ testing.TB) {} },
 			name:   "Diagram",
 			fields: fields{fileName: testdataFolder + "/diagram.config.yaml"},
-			want: &Config{Diagram: Diagram{
+			want: &Config{Diagram: &Diagram{
 				StackName: "teststack",
 			}},
 		},
