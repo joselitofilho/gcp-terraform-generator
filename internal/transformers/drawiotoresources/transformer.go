@@ -45,7 +45,7 @@ func Transform(mxFile *drawioxml.MxFile) (*resources.ResourceCollection, error) 
 func createResource(id, value, style string) resources.Resource {
 	// NOTE How to identify resource:
 	// - PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnY9Imh0dHBzOi8vdmVjdGEuaW8vbmFubyIgd2lkdGg9Ij
-	// - followed by 72 chars
+	// - followed by 72 chars.
 	reAppEngine := regexp.MustCompile("IwIiBoZWlnaHQ9IjE2LjAyMDAwMDQ1Nzc2MzY3MiIgZmlsbC1ydWxlPSJldmVub2RkIiB2aW")
 	reBigQuery := regexp.MustCompile("IwLjAwMTA0NTIyNzA1MDc4IiBoZWlnaHQ9IjIwLjAwMTA0NTIyNzA1MDc4IiBmaWxsLXJ1bG")
 	reCloudBigTable := regexp.MustCompile("E3Ljk1Njk3Nzg0NDIzODI4IiBoZWlnaHQ9IjIwLjAwOTI1NjM2MjkxNTA0IiB2aWV3Qm94PS")

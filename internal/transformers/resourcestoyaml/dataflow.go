@@ -6,8 +6,7 @@ import (
 )
 
 func (t *Transformer) buildDataFlowRelationship(source, dataFlow resources.Resource) {
-	switch source.ResourceType() {
-	case resources.PubSub:
+	if source.ResourceType() == resources.PubSub {
 		t.buildPubSubToDataFlow(source, dataFlow)
 	}
 }
