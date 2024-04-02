@@ -35,16 +35,18 @@ func (t *Transformer) Transform() (*config.Config, error) {
 	t.buildResourcesByTypeMap()
 	t.buildResourceRelationships()
 
+	bigQueryTables := t.buildBigQueryTables()
 	dataFlows := t.buildDataFlows()
 	iotCores := t.buildIoTCores()
 	pubSubs := t.buildPubSubs()
 	storages := t.buildStorages()
 
 	return &config.Config{
-		DataFlows: dataFlows,
-		IoTCores:  iotCores,
-		PubSubs:   pubSubs,
-		Storages:  storages,
+		BigQueryTables: bigQueryTables,
+		DataFlows:      dataFlows,
+		IoTCores:       iotCores,
+		PubSubs:        pubSubs,
+		Storages:       storages,
 	}, nil
 }
 

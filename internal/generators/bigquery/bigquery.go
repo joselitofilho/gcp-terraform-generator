@@ -1,4 +1,4 @@
-package pubsub
+package bigquery
 
 import (
 	"fmt"
@@ -13,16 +13,16 @@ import (
 	"github.com/joselitofilho/gcp-terraform-generator/internal/utils"
 )
 
-type PubSub struct {
+type BigQuery struct {
 	configFileName string
 	output         string
 }
 
-func NewPubSub(configFileName, output string) *PubSub {
-	return &PubSub{configFileName: configFileName, output: output}
+func NewBigQuery(configFileName, output string) *BigQuery {
+	return &BigQuery{configFileName: configFileName, output: output}
 }
 
-func (ps *PubSub) Build() error {
+func (ps *BigQuery) Build() error {
 	yamlParser := config.NewYAML(ps.configFileName)
 
 	yamlConfig, err := yamlParser.Parse()
@@ -36,11 +36,29 @@ func (ps *PubSub) Build() error {
 	result := make([]string, 0, len(yamlConfig.IoTCores))
 
 	templates := utils.MergeStringMap(defaultTfTemplateFiles,
-		generators.CreateTemplatesMap(yamlConfig.OverrideDefaultTemplates.PubSub))
+		generators.CreateTemplatesMap(yamlConfig.OverrideDefaultTemplates.BigQuery))
 
-	for _, conf := range yamlConfig.PubSubs {
+	for _, conf := range yamlConfig.BigQueryTables {
+		nameParts := strings.Split(conf.Name, ".")
+
+		dataset := "default"
+		if len(nameParts) > 1 {
+			dataset = nameParts[0]
+		}
+
+		table := nameParts[len(nameParts)-1]
+
+		schema := conf.Schema
+		if schema == "" {
+			schema = `<<EOF
+# Define your BigQuery schema here
+EOF`
+		}
+
 		data := Data{
-			Name: conf.Name,
+			Dataset: dataset,
+			Table:   table,
+			Schema:  schema,
 		}
 
 		if len(conf.Files) > 0 {
@@ -51,12 +69,12 @@ func (ps *PubSub) Build() error {
 				return fmt.Errorf("%w", err)
 			}
 
-			fmtcolor.White.Printf("Pub Sub '%s' has been generated successfully\n", conf.Name)
+			fmtcolor.White.Printf("Big Query '%s' has been generated successfully\n", conf.Name)
 
 			continue
 		}
 
-		output, err := generators.Build(data, "pubsub-tf-template", templates[filenamePubSubtf])
+		output, err := generators.Build(data, "bigquery-tf-template", templates[filenameBigQuerytf])
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
@@ -65,14 +83,14 @@ func (ps *PubSub) Build() error {
 	}
 
 	if len(result) > 0 {
-		outputFile := path.Join(modPath, filenamePubSubtf)
+		outputFile := path.Join(modPath, filenameBigQuerytf)
 
-		err := generators.GenerateFile(nil, filenamePubSubtf, strings.Join(result, "\n"), outputFile, Data{})
+		err := generators.GenerateFile(nil, filenameBigQuerytf, strings.Join(result, "\n"), outputFile, Data{})
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
 
-		fmtcolor.White.Println("Pub Sub has been generated successfully")
+		fmtcolor.White.Println("Big Query has been generated successfully")
 	}
 
 	return nil

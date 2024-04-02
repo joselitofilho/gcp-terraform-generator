@@ -1,0 +1,12 @@
+// {{$.Dataset}}.{{$.Table}} Big Query Table
+resource "google_bigquery_dataset" "{{ToSnake $.Dataset}}_dataset" {
+  dataset_id = "{{$.Dataset}}"
+}
+
+resource "google_bigquery_table" "{{ToSnake $.Dataset}}_{{ToSnake $.Table}}_table" {
+  dataset_id = google_bigquery_dataset.{{ToSnake $.Dataset}}_dataset.dataset_id
+  table_id   = "{{$.Table}}"
+  
+  schema = {{$.Schema}}
+
+}

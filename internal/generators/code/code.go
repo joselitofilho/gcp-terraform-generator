@@ -3,6 +3,7 @@ package code
 import (
 	"fmt"
 
+	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/bigquery"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/dataflow"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/iotcore"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/pubsub"
@@ -19,6 +20,10 @@ func NewCode(configFileName, output string) *Code {
 }
 
 func (c *Code) Build() error {
+	if err := bigquery.NewBigQuery(c.configFileName, c.output).Build(); err != nil {
+		return fmt.Errorf("fails to build Big Query: %w", err)
+	}
+
 	if err := dataflow.NewDataFlow(c.configFileName, c.output).Build(); err != nil {
 		return fmt.Errorf("fails to build DataFlow: %w", err)
 	}
