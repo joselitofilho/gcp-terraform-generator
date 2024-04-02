@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/iotcore"
+	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/pubsub"
 )
 
 type Code struct {
@@ -16,9 +17,12 @@ func NewCode(configFileName, output string) *Code {
 }
 
 func (c *Code) Build() error {
-	err := iotcore.NewIoTCore(c.configFileName, c.output).Build()
-	if err != nil {
-		return fmt.Errorf("fails to build IoTCore: %w", err)
+	if err := iotcore.NewIoTCore(c.configFileName, c.output).Build(); err != nil {
+		return fmt.Errorf("fails to build IoT Core: %w", err)
+	}
+
+	if err := pubsub.NewPubSub(c.configFileName, c.output).Build(); err != nil {
+		return fmt.Errorf("fails to build Pub Sub: %w", err)
 	}
 
 	return nil
