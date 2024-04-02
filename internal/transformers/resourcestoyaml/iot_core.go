@@ -5,18 +5,18 @@ import (
 	"github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 )
 
-func (t *Transformer) buildIoTCores() (cores []*config.IoTCore) {
-	for _, core := range t.resourcesByTypeMap[resources.IoTCore] {
-		coreID := core.ID()
+func (t *Transformer) buildIoTCores() (result []*config.IoTCore) {
+	for _, c := range t.resourcesByTypeMap[resources.IoTCore] {
+		coreID := c.ID()
 		eventNotificationConfigs := make([]*config.EventNotificationConfig, 0, len(t.pubSubByIoTCoreID[coreID]))
 
-		for i := range t.pubSubByIoTCoreID[coreID] {
+		for _, r := range t.pubSubByIoTCoreID[coreID] {
 			eventNotificationConfigs = append(eventNotificationConfigs,
-				&config.EventNotificationConfig{TopicName: t.pubSubByIoTCoreID[coreID][i].Value()})
+				&config.EventNotificationConfig{TopicName: r.Value()})
 		}
 
-		cores = append(cores, &config.IoTCore{Name: core.Value(), EventNotificationConfigs: eventNotificationConfigs})
+		result = append(result, &config.IoTCore{Name: c.Value(), EventNotificationConfigs: eventNotificationConfigs})
 	}
 
-	return cores
+	return result
 }

@@ -5,16 +5,16 @@ import (
 	"github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 )
 
-func (t *Transformer) buildPubSubRelationship(source, pubsub resources.Resource) {
+func (t *Transformer) buildPubSubRelationship(source, pubSub resources.Resource) {
 	if source.ResourceType() == resources.IoTCore {
-		t.buildIoTCoreToPubSub(source, pubsub)
+		t.buildIoTCoreToPubSub(source, pubSub)
 	}
 }
 
-func (t *Transformer) buildPubSubs() (pubsubs []*config.PubSub) {
-	for _, pubsub := range t.resourcesByTypeMap[resources.PubSub] {
-		pubsubs = append(pubsubs, &config.PubSub{Name: pubsub.Value()})
+func (t *Transformer) buildPubSubs() (result []*config.PubSub) {
+	for _, ps := range t.resourcesByTypeMap[resources.PubSub] {
+		result = append(result, &config.PubSub{Name: ps.Value()})
 	}
 
-	return pubsubs
+	return result
 }
