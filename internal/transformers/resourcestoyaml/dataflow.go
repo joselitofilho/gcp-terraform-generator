@@ -15,12 +15,21 @@ func (t *Transformer) buildDataFlowRelationship(source, dataFlow resources.Resou
 func (t *Transformer) buildDataFlows() (result []*config.DataFlow) {
 	for _, df := range t.resourcesByTypeMap[resources.Dataflow] {
 		inputTopics := []string{}
+		outputTables := []string{}
 
 		for _, ps := range t.pubSubByDataFlowID[df.ID()] {
 			inputTopics = append(inputTopics, ps.Value())
 		}
 
-		result = append(result, &config.DataFlow{Name: df.Value(), InputTopics: inputTopics})
+		for _, bq := range t.bqTablesByDataFlowID[df.ID()] {
+			outputTables = append(outputTables, bq.Value())
+		}
+
+		result = append(result, &config.DataFlow{
+			Name:         df.Value(),
+			InputTopics:  inputTopics,
+			OutputTables: outputTables,
+		})
 	}
 
 	return result
