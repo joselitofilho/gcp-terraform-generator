@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import cmd "github.com/joselitofilho/gcp-terraform-generator/internal/cmd"
+import cmd "github.com/joselitofilho/gcp-terraform-generator/cmd"
 
 func main() {
 	cmd.Execute()
