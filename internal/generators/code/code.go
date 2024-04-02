@@ -3,6 +3,7 @@ package code
 import (
 	"fmt"
 
+	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/dataflow"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/iotcore"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/pubsub"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/storage"
@@ -18,6 +19,10 @@ func NewCode(configFileName, output string) *Code {
 }
 
 func (c *Code) Build() error {
+	if err := dataflow.NewDataFlow(c.configFileName, c.output).Build(); err != nil {
+		return fmt.Errorf("fails to build DataFlow: %w", err)
+	}
+
 	if err := iotcore.NewIoTCore(c.configFileName, c.output).Build(); err != nil {
 		return fmt.Errorf("fails to build IoT Core: %w", err)
 	}

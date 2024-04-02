@@ -1,0 +1,16 @@
+resource "google_dataflow_job" "{{ToSnake $.Name}}_df_job" {
+  name = "{{$.Name}}"
+
+  template_gcs_path = "gs://my-bucket/templates/template_file"
+  temp_gcs_location = "gs://my-bucket/tmp_dir"
+  
+  parameters = {
+    {{ $length := len $.InputTopics}}{{ if gt $length 0 }}{{ range $i, $topic := $.InputTopics }}
+    inputTopic{{ if gt $length 1 }}{{$i}}{{end}} = google_pubsub_subscription.{{ToSnake $topic}}_subscription.name{{end}}
+    {{end}}{{ $length := len $.OutputDirectories}}{{ if gt $length 0 }}{{ range $i, $storage := $.OutputDirectories }}
+    outputDirectory{{ if gt $length 1 }}{{$i}}{{end}} = "gs://${google_storage_bucket.{{ToSnake $storage}}_bucket.name}/output/"{{end}}
+    {{end}}{{ $length := len $.OutputTables}}{{ if gt $length 0 }}{{ range $i, $table := $.OutputTables }}
+    outputTable{{ if gt $length 1 }}{{$i}}{{end}} = "${var.project_id}:${google_bigquery_table.{{ToSnake $table}}_table.dataset_id}.${google_bigquery_table.{{ToSnake $table}}_table.table_id}"{{end}}
+    {{end}}
+  }
+}
