@@ -9,7 +9,7 @@ func (t *Transformer) buildDataFlowToBigQuery(dataFlow, bq resources.Resource) {
 
 func (t *Transformer) buildDataFlowToStorage(dataFlow, storage resources.Resource) {
 	dataFlowID := dataFlow.ID()
-	t.storageByDataFlowID[dataFlowID] = append(t.pubSubByDataFlowID[dataFlowID], storage)
+	t.storageByDataFlowID[dataFlowID] = append(t.storageByDataFlowID[dataFlowID], storage)
 }
 
 func (t *Transformer) buildIoTCoreToPubSub(core, pubSub resources.Resource) {

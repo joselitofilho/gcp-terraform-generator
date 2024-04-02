@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"os"
 
+	"github.com/joselitofilho/gcp-terraform-generator/internal/fmtcolor"
 	"github.com/spf13/cobra"
 )
 
@@ -44,6 +44,6 @@ func init() {
 }
 
 func printErrorAndExit(err error) {
-	fmt.Printf("🚨 %s\n", err)
+	fmtcolor.Red.Printf("🚨 %s\n", err)
 	os.Exit(1)
 }

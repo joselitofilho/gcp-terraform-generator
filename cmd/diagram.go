@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/joselitofilho/gcp-terraform-generator/internal/fmtcolor"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/diagram"
 
 	"github.com/spf13/cobra"
@@ -32,7 +31,7 @@ var diagramCmd = &cobra.Command{
 			printErrorAndExit(err)
 		}
 
-		fmt.Printf("Configuration file '%s' has been generated successfully\n", output)
+		fmtcolor.White.Printf("Configuration file '%s' has been generated successfully\n", output)
 	},
 }
 
