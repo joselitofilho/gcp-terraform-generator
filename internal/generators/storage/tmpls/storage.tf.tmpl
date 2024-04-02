@@ -1,0 +1,4 @@
+resource "google_storage_bucket" "{{ToSnake $.Name}}_bucket" {
+  name     = "{{$.Name}}"
+  location = "{{$.Location}}"
+}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/iotcore"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/pubsub"
+	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/storage"
 )
 
 type Code struct {
@@ -23,6 +24,10 @@ func (c *Code) Build() error {
 
 	if err := pubsub.NewPubSub(c.configFileName, c.output).Build(); err != nil {
 		return fmt.Errorf("fails to build Pub Sub: %w", err)
+	}
+
+	if err := storage.NewStorage(c.configFileName, c.output).Build(); err != nil {
+		return fmt.Errorf("fails to build Storage: %w", err)
 	}
 
 	return nil
