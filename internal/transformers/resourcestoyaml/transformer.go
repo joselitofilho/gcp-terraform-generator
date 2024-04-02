@@ -12,6 +12,7 @@ type Transformer struct {
 	bqTablesByDataFlowID map[string][]resources.Resource
 	pubSubByIoTCoreID    map[string][]resources.Resource
 	pubSubByDataFlowID   map[string][]resources.Resource
+	storageByDataFlowID  map[string][]resources.Resource
 
 	resourcesByTypeMap map[resources.ResourceType][]resources.Resource
 }
@@ -24,6 +25,7 @@ func NewTransformer(yamlConfig *config.Config, resc *resources.ResourceCollectio
 		bqTablesByDataFlowID: map[string][]resources.Resource{},
 		pubSubByIoTCoreID:    map[string][]resources.Resource{},
 		pubSubByDataFlowID:   map[string][]resources.Resource{},
+		storageByDataFlowID:  map[string][]resources.Resource{},
 
 		resourcesByTypeMap: map[resources.ResourceType][]resources.Resource{},
 	}
@@ -33,14 +35,16 @@ func (t *Transformer) Transform() (*config.Config, error) {
 	t.buildResourcesByTypeMap()
 	t.buildResourceRelationships()
 
+	dataFlows := t.buildDataFlows()
 	iotCores := t.buildIoTCores()
 	pubSubs := t.buildPubSubs()
-	dataFlows := t.buildDataFlows()
+	storages := t.buildStorages()
 
 	return &config.Config{
+		DataFlows: dataFlows,
 		IoTCores:  iotCores,
 		PubSubs:   pubSubs,
-		DataFlows: dataFlows,
+		Storages:  storages,
 	}, nil
 }
 
@@ -62,6 +66,8 @@ func (t *Transformer) buildResourceRelationships() {
 			t.buildDataFlowRelationship(source, target)
 		case resources.PubSub:
 			t.buildPubSubRelationship(source, target)
+		case resources.Storage:
+			t.buildStorageRelationship(source, target)
 		}
 	}
 }

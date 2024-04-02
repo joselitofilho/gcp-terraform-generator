@@ -61,11 +61,11 @@ func createResource(id, value, style string) resources.Resource {
 	case reBigQuery.MatchString(style):
 		return resources.NewGenericResource(id, value, resources.BigQuery)
 	case reCloudBigTable.MatchString(style):
-		return resources.NewGenericResource(id, value, resources.CloudBigTable)
+		return resources.NewGenericResource(id, value, resources.BigTable)
 	case reCloudFunction.MatchString(style):
-		return resources.NewGenericResource(id, value, resources.CloudFunction)
+		return resources.NewGenericResource(id, value, resources.Function)
 	case reCloudStorage.MatchString(style):
-		return resources.NewGenericResource(id, value, resources.CloudStorage)
+		return resources.NewGenericResource(id, value, resources.Storage)
 	case reDataflow.MatchString(style):
 		return resources.NewGenericResource(id, value, resources.Dataflow)
 	case resIoTCore.MatchString(style):

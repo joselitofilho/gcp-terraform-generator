@@ -12,14 +12,14 @@ const (
 	// BigQuery represents the BigQuery resource type.
 	BigQuery ResourceType = "bigquery"
 
-	// CloudBigTable represents the Cloud Big Table resource type.
-	CloudBigTable ResourceType = "cloudbigtable"
+	// BigTable represents the Cloud Big Table resource type.
+	BigTable ResourceType = "bigtable"
 
-	// CloudFunction represents the Cloud Function resource type.
-	CloudFunction ResourceType = "cloudfunction"
+	// Function represents the Cloud Function resource type.
+	Function ResourceType = "function"
 
-	// CloudStorage represents the Cloud Storage resource type.
-	CloudStorage ResourceType = "cloudstorage"
+	// Storage represents the Cloud Storage resource type.
+	Storage ResourceType = "storage"
 
 	// Dataflow represents the Dataflow resource type.
 	Dataflow ResourceType = "dataflow"
@@ -35,7 +35,7 @@ const (
 )
 
 var AvailableTypes = []ResourceType{
-	AppEngine, BigQuery, CloudBigTable, CloudFunction, CloudStorage, Dataflow, IoTCore, PubSub}
+	AppEngine, BigQuery, BigTable, Function, Storage, Dataflow, IoTCore, PubSub}
 
 // String returns the string representation of a ResourceType.
 func (rt ResourceType) String() string {
@@ -44,12 +44,12 @@ func (rt ResourceType) String() string {
 		return "AppEngine"
 	case BigQuery:
 		return "BigQuery"
-	case CloudBigTable:
-		return "CloudBigTable"
-	case CloudFunction:
-		return "CloudFunction"
-	case CloudStorage:
-		return "CloudStorage"
+	case BigTable:
+		return "BigTable"
+	case Function:
+		return "Function"
+	case Storage:
+		return "Storage"
 	case Dataflow:
 		return "Dataflow"
 	case IoTCore:
@@ -68,12 +68,12 @@ func ParseResourceType(s string) ResourceType {
 		return AppEngine
 	case "bigquery":
 		return BigQuery
-	case "cloudbigtable":
-		return CloudBigTable
-	case "cloudfunction":
-		return CloudFunction
-	case "cloudstorage":
-		return CloudStorage
+	case "bigtable":
+		return BigTable
+	case "function":
+		return Function
+	case "storage":
+		return Storage
 	case "dataflow":
 		return Dataflow
 	case "iotcore":

@@ -8,7 +8,8 @@ type Resource interface {
 type Config struct {
 	Diagram   *Diagram    `yaml:"diagram,omitempty"`
 	Structure *Structure  `yaml:"structure,omitempty"`
-	IoTCores  []*IoTCore  `yaml:"iot_cores,omitempty"`
 	DataFlows []*DataFlow `yaml:"dataflows,omitempty"`
+	IoTCores  []*IoTCore  `yaml:"iot_cores,omitempty"`
 	PubSubs   []*PubSub   `yaml:"pubsubs,omitempty"`
+	Storages  []*Storage  `yaml:"storages,omitempty"`
 }
