@@ -9,6 +9,7 @@ type Transformer struct {
 	yamlConfig *config.Config
 	resc       *resources.ResourceCollection
 
+	appEngineByPubSubID      map[string][]resources.Resource
 	bqTablesByDataFlowID     map[string][]resources.Resource
 	pubSubByIoTCoreID        map[string][]resources.Resource
 	inputPubSubByDataFlowID  map[string][]resources.Resource
@@ -23,6 +24,7 @@ func NewTransformer(yamlConfig *config.Config, resc *resources.ResourceCollectio
 		yamlConfig: yamlConfig,
 		resc:       resc,
 
+		appEngineByPubSubID:      map[string][]resources.Resource{},
 		bqTablesByDataFlowID:     map[string][]resources.Resource{},
 		pubSubByIoTCoreID:        map[string][]resources.Resource{},
 		inputPubSubByDataFlowID:  map[string][]resources.Resource{},
@@ -66,6 +68,8 @@ func (t *Transformer) buildResourceRelationships() {
 		source := rel.Source
 
 		switch target.ResourceType() {
+		case resources.AppEngine:
+			t.buildAppEngineRelationship(source, target)
 		case resources.BigQuery:
 			t.buildBigQueryRelationship(source, target)
 		case resources.Dataflow:

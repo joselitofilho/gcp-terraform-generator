@@ -1,5 +1,6 @@
 package pubsub
 
 type Data struct {
-	Name string
+	Name   string
+	Labels map[string]string
 }

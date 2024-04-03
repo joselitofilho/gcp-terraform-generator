@@ -22,6 +22,11 @@ func (t *Transformer) buildIoTCoreToPubSub(core, pubSub resources.Resource) {
 	t.pubSubByIoTCoreID[coreID] = append(t.pubSubByIoTCoreID[coreID], pubSub)
 }
 
+func (t *Transformer) buildPubSubToAppEngine(pubSub, appEngine resources.Resource) {
+	pubSubID := pubSub.ID()
+	t.appEngineByPubSubID[pubSubID] = append(t.appEngineByPubSubID[pubSubID], appEngine)
+}
+
 func (t *Transformer) buildPubSubToDataFlow(pubSub, dataFlow resources.Resource) {
 	dataFlowID := dataFlow.ID()
 	t.inputPubSubByDataFlowID[dataFlowID] = append(t.inputPubSubByDataFlowID[dataFlowID], pubSub)

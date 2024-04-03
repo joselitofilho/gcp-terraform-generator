@@ -1,7 +1,7 @@
 // {{ToSpace $.Name}} IoT Core
 resource "google_cloudiot_registry" "{{ToSnake $.Name}}_registry" {
   name = "{{$.Name}}"
-  {{ $length := len $.EventNotificationConfigs}}{{ if gt $length 0 }}{{ range $i, $evt := $.EventNotificationConfigs }}
+  {{ if gt (len $.EventNotificationConfigs) 0 }}{{ range $i, $evt := $.EventNotificationConfigs }}
   event_notification_configs {
     pubsub_topic_name = google_pubsub_topic.{{ToSnake .TopicName}}_topic.id
   }
