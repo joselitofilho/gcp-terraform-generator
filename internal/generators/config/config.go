@@ -9,6 +9,7 @@ type Config struct {
 	OverrideDefaultTemplates OverrideDefaultTemplates `yaml:"override_default_templates,omitempty"`
 	Diagram                  *Diagram                 `yaml:"diagram,omitempty"`
 	Structure                *Structure               `yaml:"structure,omitempty"`
+	AppEngines               []*AppEngine             `yaml:"appengines,omitempty"`
 	BigQueryTables           []*BigQueryTable         `yaml:"bigquery,omitempty"`
 	DataFlows                []*DataFlow              `yaml:"dataflows,omitempty"`
 	IoTCores                 []*IoTCore               `yaml:"iotcores,omitempty"`

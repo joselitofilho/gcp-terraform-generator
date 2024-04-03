@@ -1,0 +1,4 @@
+resource "google_app_engine_application" "{{ToSnake $.Name}}_app" {
+  project     = var.project_id
+  location_id = "{{$.LocationID}}"
+}

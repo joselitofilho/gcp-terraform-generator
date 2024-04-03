@@ -35,6 +35,7 @@ func (t *Transformer) Transform() (*config.Config, error) {
 	t.buildResourcesByTypeMap()
 	t.buildResourceRelationships()
 
+	appEngines := t.buildAppEngines()
 	bigQueryTables := t.buildBigQueryTables()
 	dataFlows := t.buildDataFlows()
 	iotCores := t.buildIoTCores()
@@ -42,6 +43,7 @@ func (t *Transformer) Transform() (*config.Config, error) {
 	storages := t.buildStorages()
 
 	return &config.Config{
+		AppEngines:     appEngines,
 		BigQueryTables: bigQueryTables,
 		DataFlows:      dataFlows,
 		IoTCores:       iotCores,
