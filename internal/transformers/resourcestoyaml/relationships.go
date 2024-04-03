@@ -2,6 +2,11 @@ package resourcestoyaml
 
 import "github.com/diagram-code-generator/resources/pkg/resources"
 
+func (t *Transformer) buildAppEngineToBigTable(appEngine, bigTable resources.Resource) {
+	bigTableID := bigTable.ID()
+	t.appEngineByBigTableID[bigTableID] = append(t.appEngineByBigTableID[bigTableID], appEngine)
+}
+
 func (t *Transformer) buildDataFlowToBigQuery(dataFlow, bq resources.Resource) {
 	dataFlowID := dataFlow.ID()
 	t.bqTablesByDataFlowID[dataFlowID] = append(t.bqTablesByDataFlowID[dataFlowID], bq)

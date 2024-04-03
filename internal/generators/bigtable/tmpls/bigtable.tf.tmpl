@@ -1,0 +1,13 @@
+resource "google_bigtable_instance" "{{ToSnake $.Name}}_instance" {
+  name          = "{{$.Name}}-instance"
+  display_name  = "{{$.Name}} Instance"
+  
+  cluster {
+    cluster_id   = "{{$.Name}}-instance-cluster"
+    num_nodes    = 1
+  }{{ if gt (len $.Labels) 0 }}
+  
+  labels = {
+    {{ range $key, $value := $.Labels }}{{$key}} = {{$value}}
+  {{end}}}{{end}}
+}

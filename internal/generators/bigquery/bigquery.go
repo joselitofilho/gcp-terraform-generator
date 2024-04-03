@@ -33,7 +33,7 @@ func (ps *BigQuery) Build() error {
 	modPath := path.Join(ps.output, "mod")
 	_ = os.MkdirAll(modPath, os.ModePerm)
 
-	result := make([]string, 0, len(yamlConfig.IoTCores))
+	result := make([]string, 0, len(yamlConfig.BigQueryTables))
 
 	templates := utils.MergeStringMap(defaultTfTemplateFiles,
 		generators.CreateTemplatesMap(yamlConfig.OverrideDefaultTemplates.BigQuery))

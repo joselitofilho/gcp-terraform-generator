@@ -28,7 +28,7 @@ func (t *Transformer) buildPubSubs() (result []*config.PubSub) {
 
 			for _, a := range t.appEngineByPubSubID[ps.ID()] {
 				k := fmt.Sprintf("%s-subscriber", a.Value())
-				v := fmt.Sprintf(`"${google_app_engine_application.%s_app.name}"`, strcase.ToSnake(a.Value()))
+				v := fmt.Sprintf("google_app_engine_application.%s_app.name", strcase.ToSnake(a.Value()))
 				labels[k] = v
 			}
 		}

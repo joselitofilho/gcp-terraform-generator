@@ -5,6 +5,7 @@ import (
 
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/appengine"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/bigquery"
+	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/bigtable"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/dataflow"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/iotcore"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/pubsub"
@@ -27,6 +28,10 @@ func (c *Code) Build() error {
 
 	if err := bigquery.NewBigQuery(c.configFileName, c.output).Build(); err != nil {
 		return fmt.Errorf("fails to build Big Query: %w", err)
+	}
+
+	if err := bigtable.NewBigTable(c.configFileName, c.output).Build(); err != nil {
+		return fmt.Errorf("fails to build Big Table: %w", err)
 	}
 
 	if err := dataflow.NewDataFlow(c.configFileName, c.output).Build(); err != nil {

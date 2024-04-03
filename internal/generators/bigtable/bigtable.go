@@ -1,4 +1,4 @@
-package appengine
+package bigtable
 
 import (
 	"fmt"
@@ -13,16 +13,16 @@ import (
 	"github.com/joselitofilho/gcp-terraform-generator/internal/utils"
 )
 
-type AppEngine struct {
+type BigTable struct {
 	configFileName string
 	output         string
 }
 
-func NewAppEngine(configFileName, output string) *AppEngine {
-	return &AppEngine{configFileName: configFileName, output: output}
+func NewBigTable(configFileName, output string) *BigTable {
+	return &BigTable{configFileName: configFileName, output: output}
 }
 
-func (ps *AppEngine) Build() error {
+func (ps *BigTable) Build() error {
 	yamlParser := config.NewYAML(ps.configFileName)
 
 	yamlConfig, err := yamlParser.Parse()
@@ -33,15 +33,15 @@ func (ps *AppEngine) Build() error {
 	modPath := path.Join(ps.output, "mod")
 	_ = os.MkdirAll(modPath, os.ModePerm)
 
-	result := make([]string, 0, len(yamlConfig.AppEngines))
+	result := make([]string, 0, len(yamlConfig.BigTables))
 
 	templates := utils.MergeStringMap(defaultTfTemplateFiles,
-		generators.CreateTemplatesMap(yamlConfig.OverrideDefaultTemplates.AppEngine))
+		generators.CreateTemplatesMap(yamlConfig.OverrideDefaultTemplates.BigTable))
 
-	for _, conf := range yamlConfig.AppEngines {
+	for _, conf := range yamlConfig.BigTables {
 		data := Data{
-			Name:       conf.Name,
-			LocationID: conf.LocationID,
+			Name:   conf.Name,
+			Labels: conf.Labels,
 		}
 
 		if len(conf.Files) > 0 {
@@ -52,12 +52,12 @@ func (ps *AppEngine) Build() error {
 				return fmt.Errorf("%w", err)
 			}
 
-			fmtcolor.White.Printf("App Engine '%s' has been generated successfully\n", conf.Name)
+			fmtcolor.White.Printf("Big Table '%s' has been generated successfully\n", conf.Name)
 
 			continue
 		}
 
-		output, err := generators.Build(data, "appengine-tf-template", templates[filenameAppEnginetf])
+		output, err := generators.Build(data, "bigtable-tf-template", templates[filenameBigTabletf])
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
@@ -66,14 +66,14 @@ func (ps *AppEngine) Build() error {
 	}
 
 	if len(result) > 0 {
-		outputFile := path.Join(modPath, filenameAppEnginetf)
+		outputFile := path.Join(modPath, filenameBigTabletf)
 
-		err := generators.GenerateFile(nil, filenameAppEnginetf, strings.Join(result, "\n"), outputFile, Data{})
+		err := generators.GenerateFile(nil, filenameBigTabletf, strings.Join(result, "\n"), outputFile, Data{})
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
 
-		fmtcolor.White.Println("App Engine has been generated successfully")
+		fmtcolor.White.Println("Big Table has been generated successfully")
 	}
 
 	return nil

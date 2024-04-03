@@ -11,6 +11,7 @@ type Transformer struct {
 	yamlConfig *config.Config
 	resc       *resources.ResourceCollection
 
+	appEngineByBigTableID    map[string][]resources.Resource
 	appEngineByPubSubID      map[string][]resources.Resource
 	bqTablesByDataFlowID     map[string][]resources.Resource
 	pubSubByIoTCoreID        map[string][]resources.Resource
@@ -26,6 +27,7 @@ func NewTransformer(yamlConfig *config.Config, resc *resources.ResourceCollectio
 		yamlConfig: yamlConfig,
 		resc:       resc,
 
+		appEngineByBigTableID:    map[string][]resources.Resource{},
 		appEngineByPubSubID:      map[string][]resources.Resource{},
 		bqTablesByDataFlowID:     map[string][]resources.Resource{},
 		pubSubByIoTCoreID:        map[string][]resources.Resource{},
@@ -43,6 +45,7 @@ func (t *Transformer) Transform() (*config.Config, error) {
 
 	appEngines := t.buildAppEngines()
 	bigQueryTables := t.buildBigQueryTables()
+	bigTables := t.buildBigTables()
 	dataFlows := t.buildDataFlows()
 	iotCores := t.buildIoTCores()
 	pubSubs := t.buildPubSubs()
@@ -51,6 +54,7 @@ func (t *Transformer) Transform() (*config.Config, error) {
 	return &config.Config{
 		AppEngines:     appEngines,
 		BigQueryTables: bigQueryTables,
+		BigTables:      bigTables,
 		DataFlows:      dataFlows,
 		IoTCores:       iotCores,
 		PubSubs:        pubSubs,
@@ -75,6 +79,8 @@ func (t *Transformer) buildResourceRelationships() {
 			t.buildAppEngineRelationship(source, target)
 		case gcpresources.BigQuery:
 			t.buildBigQueryRelationship(source, target)
+		case gcpresources.BigTable:
+			t.buildBigTableRelationship(source, target)
 		case gcpresources.Dataflow:
 			t.buildDataFlowRelationship(source, target)
 		case gcpresources.PubSub:
