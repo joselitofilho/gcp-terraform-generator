@@ -1,0 +1,25 @@
+// {{$.Name}} Function
+resource "google_cloudfunctions_function" "{{ToSnake $.Name}}_fn" {
+  name        = "{{$.Name}}"
+  description = "{{$.Name}} function"
+  runtime     = "{{$.Runtime}}"
+
+  {{ if $.SourceArchiveBucket }}source_archive_bucket = "{{$.SourceArchiveBucket}}"{{end}}
+  {{ if $.SourceArchiveObject }}source_archive_object = "{{$.SourceArchiveObject}}"{{end}}
+  {{ if $.TriggerHTTP }}trigger_http = "{{$.TriggerHTTP}}"{{end}}
+  {{ if $.EntryPoint }}entry_point = "{{$.EntryPoint}}"{{end}}
+}
+
+// IAM entry for all users to invoke the function {{$.Name}}
+resource "google_cloudfunctions_function_iam_member" "{{ToSnake $.Name}}_invoker" {
+  cloud_function = google_cloudfunctions_function.{{ToSnake $.Name}}_fn.name
+
+  role   = "roles/cloudfunctions.invoker"
+  member = "allUsers"
+}
+
+resource "google_storage_bucket_object" "{{ToSnake $.Name}}_archive_funcs_object" {
+  name   = "{{$.Name}}.zip"
+  bucket = google_storage_bucket.archive_funcs_bucket.name
+  source = "{{$.Source}}/{{$.Name}}.zip"
+}

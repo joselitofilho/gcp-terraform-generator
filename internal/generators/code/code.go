@@ -7,6 +7,7 @@ import (
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/bigquery"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/bigtable"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/dataflow"
+	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/function"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/iotcore"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/pubsub"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/storage"
@@ -36,6 +37,10 @@ func (c *Code) Build() error {
 
 	if err := dataflow.NewDataFlow(c.configFileName, c.output).Build(); err != nil {
 		return fmt.Errorf("fails to build DataFlow: %w", err)
+	}
+
+	if err := function.NewFunction(c.configFileName, c.output).Build(); err != nil {
+		return fmt.Errorf("fails to build Function: %w", err)
 	}
 
 	if err := iotcore.NewIoTCore(c.configFileName, c.output).Build(); err != nil {

@@ -47,6 +47,7 @@ func (t *Transformer) Transform() (*config.Config, error) {
 	bigQueryTables := t.buildBigQueryTables()
 	bigTables := t.buildBigTables()
 	dataFlows := t.buildDataFlows()
+	functions := t.buildFunctions()
 	iotCores := t.buildIoTCores()
 	pubSubs := t.buildPubSubs()
 	storages := t.buildStorages()
@@ -56,6 +57,7 @@ func (t *Transformer) Transform() (*config.Config, error) {
 		BigQueryTables: bigQueryTables,
 		BigTables:      bigTables,
 		DataFlows:      dataFlows,
+		Functions:      functions,
 		IoTCores:       iotCores,
 		PubSubs:        pubSubs,
 		Storages:       storages,
