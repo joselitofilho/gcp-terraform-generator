@@ -15,6 +15,8 @@ func (t *Transformer) buildPubSubRelationship(source, pubSub resources.Resource)
 	switch gcpresources.ParseResourceType(source.ResourceType()) {
 	case gcpresources.Dataflow:
 		t.buildDataFlowToPubSub(source, pubSub)
+	case gcpresources.Function:
+		t.buildFunctionToPubSub(source, pubSub)
 	case gcpresources.IoTCore:
 		t.buildIoTCoreToPubSub(source, pubSub)
 	}
@@ -26,6 +28,12 @@ func (t *Transformer) buildPubSubs() (result []*config.PubSub) {
 		if len(t.appEngineByPubSubID[ps.ID()]) > 0 {
 			labels = map[string]string{}
 
+			for _, fn := range t.functionPublisherByPubSubID[ps.ID()] {
+				k := fmt.Sprintf("%s-publisher", fn.Value())
+				v := fmt.Sprintf("google_cloudfunctions_function.%s_function.name", strcase.ToSnake(fn.Value()))
+				labels[k] = v
+			}
+
 			for _, a := range t.appEngineByPubSubID[ps.ID()] {
 				k := fmt.Sprintf("%s-subscriber", a.Value())
 				v := fmt.Sprintf("google_app_engine_application.%s_app.name", strcase.ToSnake(a.Value()))
@@ -34,7 +42,7 @@ func (t *Transformer) buildPubSubs() (result []*config.PubSub) {
 		}
 
 		var pushEndpoint string
-		fn, ok := t.functionByPubSubID[ps.ID()]
+		fn, ok := t.functionSubscriberByPubSubID[ps.ID()]
 		if ok {
 			pushEndpoint = fn.Value()
 		}

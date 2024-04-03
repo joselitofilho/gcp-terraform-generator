@@ -22,6 +22,11 @@ func (t *Transformer) buildDataFlowToStorage(dataFlow, storage resources.Resourc
 	t.storageByDataFlowID[dataFlowID] = append(t.storageByDataFlowID[dataFlowID], storage)
 }
 
+func (t *Transformer) buildFunctionToPubSub(function, pubSub resources.Resource) {
+	pubSubID := pubSub.ID()
+	t.functionPublisherByPubSubID[pubSubID] = append(t.functionPublisherByPubSubID[pubSubID], function)
+}
+
 func (t *Transformer) buildIoTCoreToPubSub(core, pubSub resources.Resource) {
 	coreID := core.ID()
 	t.pubSubByIoTCoreID[coreID] = append(t.pubSubByIoTCoreID[coreID], pubSub)
@@ -34,7 +39,7 @@ func (t *Transformer) buildPubSubToAppEngine(pubSub, appEngine resources.Resourc
 
 func (t *Transformer) buildPubSubToFunction(pubSub, function resources.Resource) {
 	pubSubID := pubSub.ID()
-	t.functionByPubSubID[pubSubID] = function
+	t.functionSubscriberByPubSubID[pubSubID] = function
 
 	functionID := function.ID()
 	t.pubSubByFunctionID[functionID] = append(t.pubSubByFunctionID[functionID], pubSub)

@@ -11,15 +11,16 @@ type Transformer struct {
 	yamlConfig *config.Config
 	resc       *resources.ResourceCollection
 
-	appEngineByBigTableID    map[string][]resources.Resource
-	appEngineByPubSubID      map[string][]resources.Resource
-	bqTablesByDataFlowID     map[string][]resources.Resource
-	functionByPubSubID       map[string]resources.Resource
-	pubSubByIoTCoreID        map[string][]resources.Resource
-	pubSubByFunctionID       map[string][]resources.Resource
-	inputPubSubByDataFlowID  map[string][]resources.Resource
-	outputPubSubByDataFlowID map[string][]resources.Resource
-	storageByDataFlowID      map[string][]resources.Resource
+	appEngineByBigTableID        map[string][]resources.Resource
+	appEngineByPubSubID          map[string][]resources.Resource
+	bqTablesByDataFlowID         map[string][]resources.Resource
+	functionPublisherByPubSubID  map[string][]resources.Resource
+	functionSubscriberByPubSubID map[string]resources.Resource
+	pubSubByIoTCoreID            map[string][]resources.Resource
+	pubSubByFunctionID           map[string][]resources.Resource
+	inputPubSubByDataFlowID      map[string][]resources.Resource
+	outputPubSubByDataFlowID     map[string][]resources.Resource
+	storageByDataFlowID          map[string][]resources.Resource
 
 	resourcesByTypeMap map[gcpresources.ResourceType][]resources.Resource
 }
@@ -29,15 +30,16 @@ func NewTransformer(yamlConfig *config.Config, resc *resources.ResourceCollectio
 		yamlConfig: yamlConfig,
 		resc:       resc,
 
-		appEngineByBigTableID:    map[string][]resources.Resource{},
-		appEngineByPubSubID:      map[string][]resources.Resource{},
-		bqTablesByDataFlowID:     map[string][]resources.Resource{},
-		functionByPubSubID:       map[string]resources.Resource{},
-		pubSubByIoTCoreID:        map[string][]resources.Resource{},
-		pubSubByFunctionID:       map[string][]resources.Resource{},
-		inputPubSubByDataFlowID:  map[string][]resources.Resource{},
-		outputPubSubByDataFlowID: map[string][]resources.Resource{},
-		storageByDataFlowID:      map[string][]resources.Resource{},
+		appEngineByBigTableID:        map[string][]resources.Resource{},
+		appEngineByPubSubID:          map[string][]resources.Resource{},
+		bqTablesByDataFlowID:         map[string][]resources.Resource{},
+		functionPublisherByPubSubID:  map[string][]resources.Resource{},
+		functionSubscriberByPubSubID: map[string]resources.Resource{},
+		pubSubByIoTCoreID:            map[string][]resources.Resource{},
+		pubSubByFunctionID:           map[string][]resources.Resource{},
+		inputPubSubByDataFlowID:      map[string][]resources.Resource{},
+		outputPubSubByDataFlowID:     map[string][]resources.Resource{},
+		storageByDataFlowID:          map[string][]resources.Resource{},
 
 		resourcesByTypeMap: map[gcpresources.ResourceType][]resources.Resource{},
 	}
