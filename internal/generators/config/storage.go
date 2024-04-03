@@ -2,7 +2,7 @@ package config
 
 type Storage struct {
 	Name     string `yaml:"name"`
-	Location string `yaml:"locaiton"`
+	Location string `yaml:"location"`
 	Files    []File `yaml:"files,omitempty"`
 }
 

@@ -5,6 +5,11 @@ import (
 	"github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 )
 
+const (
+	defaultTemplateGcsPath = "gs://my-bucket/templates/template_file"
+	defaultTempGcsLocation = "gs://my-bucket/tmp_dir"
+)
+
 func (t *Transformer) buildDataFlowRelationship(source, dataFlow resources.Resource) {
 	if source.ResourceType() == resources.PubSub {
 		t.buildPubSubToDataFlow(source, dataFlow)
@@ -30,6 +35,8 @@ func (t *Transformer) buildDataFlows() (result []*config.DataFlow) {
 
 		result = append(result, &config.DataFlow{
 			Name:              df.Value(),
+			TemplateGcsPath:   defaultTemplateGcsPath,
+			TempGcsLocation:   defaultTemplateGcsPath,
 			InputTopics:       inputTopics,
 			OutputDirectories: outputDirectories,
 			OutputTables:      outputTables,

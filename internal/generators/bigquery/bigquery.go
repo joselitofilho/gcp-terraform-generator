@@ -45,20 +45,12 @@ func (ps *BigQuery) Build() error {
 		if len(nameParts) > 1 {
 			dataset = nameParts[0]
 		}
-
 		table := nameParts[len(nameParts)-1]
-
-		schema := conf.Schema
-		if schema == "" {
-			schema = `<<EOF
-# Define your BigQuery schema here
-EOF`
-		}
 
 		data := Data{
 			Dataset: dataset,
 			Table:   table,
-			Schema:  schema,
+			Schema:  conf.Schema,
 		}
 
 		if len(conf.Files) > 0 {
