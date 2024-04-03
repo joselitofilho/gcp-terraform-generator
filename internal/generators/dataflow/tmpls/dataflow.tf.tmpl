@@ -7,6 +7,8 @@ resource "google_dataflow_job" "{{ToSnake $.Name}}_df_job" {
   parameters = {
     {{ $length := len $.InputTopics}}{{ if gt $length 0 }}{{ range $i, $topic := $.InputTopics }}
     inputTopic{{ if gt $length 1 }}{{$i}}{{end}} = google_pubsub_subscription.{{ToSnake $topic}}_subscription.name{{end}}
+    {{end}}{{ $length := len $.OutputTopics}}{{ if gt $length 0 }}{{ range $i, $topic := $.OutputTopics }}
+    outputTopic{{ if gt $length 1 }}{{$i}}{{end}} = google_pubsub_subscription.{{ToSnake $topic}}_subscription.name{{end}}
     {{end}}{{ $length := len $.OutputDirectories}}{{ if gt $length 0 }}{{ range $i, $storage := $.OutputDirectories }}
     outputDirectory{{ if gt $length 1 }}{{$i}}{{end}} = "gs://${google_storage_bucket.{{ToSnake $storage}}_bucket.name}/output/"{{end}}
     {{end}}{{ $length := len $.OutputTables}}{{ if gt $length 0 }}{{ range $i, $table := $.OutputTables }}

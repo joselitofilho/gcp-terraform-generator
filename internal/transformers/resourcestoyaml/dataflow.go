@@ -19,8 +19,13 @@ func (t *Transformer) buildDataFlowRelationship(source, dataFlow resources.Resou
 func (t *Transformer) buildDataFlows() (result []*config.DataFlow) {
 	for _, df := range t.resourcesByTypeMap[resources.Dataflow] {
 		inputTopics := []string{}
-		for _, ps := range t.pubSubByDataFlowID[df.ID()] {
+		for _, ps := range t.inputPubSubByDataFlowID[df.ID()] {
 			inputTopics = append(inputTopics, ps.Value())
+		}
+
+		outputTopics := []string{}
+		for _, ps := range t.outputPubSubByDataFlowID[df.ID()] {
+			outputTopics = append(outputTopics, ps.Value())
 		}
 
 		outputDirectories := []string{}
@@ -38,6 +43,7 @@ func (t *Transformer) buildDataFlows() (result []*config.DataFlow) {
 			TemplateGcsPath:   defaultTemplateGcsPath,
 			TempGcsLocation:   defaultTemplateGcsPath,
 			InputTopics:       inputTopics,
+			OutputTopics:      outputTopics,
 			OutputDirectories: outputDirectories,
 			OutputTables:      outputTables,
 		})

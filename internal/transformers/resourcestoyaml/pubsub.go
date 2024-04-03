@@ -6,7 +6,10 @@ import (
 )
 
 func (t *Transformer) buildPubSubRelationship(source, pubSub resources.Resource) {
-	if source.ResourceType() == resources.IoTCore {
+	switch source.ResourceType() {
+	case resources.Dataflow:
+		t.buildDataFlowToPubSub(source, pubSub)
+	case resources.IoTCore:
 		t.buildIoTCoreToPubSub(source, pubSub)
 	}
 }

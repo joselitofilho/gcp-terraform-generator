@@ -9,10 +9,11 @@ type Transformer struct {
 	yamlConfig *config.Config
 	resc       *resources.ResourceCollection
 
-	bqTablesByDataFlowID map[string][]resources.Resource
-	pubSubByIoTCoreID    map[string][]resources.Resource
-	pubSubByDataFlowID   map[string][]resources.Resource
-	storageByDataFlowID  map[string][]resources.Resource
+	bqTablesByDataFlowID     map[string][]resources.Resource
+	pubSubByIoTCoreID        map[string][]resources.Resource
+	inputPubSubByDataFlowID  map[string][]resources.Resource
+	outputPubSubByDataFlowID map[string][]resources.Resource
+	storageByDataFlowID      map[string][]resources.Resource
 
 	resourcesByTypeMap map[resources.ResourceType][]resources.Resource
 }
@@ -22,10 +23,11 @@ func NewTransformer(yamlConfig *config.Config, resc *resources.ResourceCollectio
 		yamlConfig: yamlConfig,
 		resc:       resc,
 
-		bqTablesByDataFlowID: map[string][]resources.Resource{},
-		pubSubByIoTCoreID:    map[string][]resources.Resource{},
-		pubSubByDataFlowID:   map[string][]resources.Resource{},
-		storageByDataFlowID:  map[string][]resources.Resource{},
+		bqTablesByDataFlowID:     map[string][]resources.Resource{},
+		pubSubByIoTCoreID:        map[string][]resources.Resource{},
+		inputPubSubByDataFlowID:  map[string][]resources.Resource{},
+		outputPubSubByDataFlowID: map[string][]resources.Resource{},
+		storageByDataFlowID:      map[string][]resources.Resource{},
 
 		resourcesByTypeMap: map[resources.ResourceType][]resources.Resource{},
 	}

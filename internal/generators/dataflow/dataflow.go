@@ -42,6 +42,7 @@ func (c *DataFlow) Build() error {
 		data := Data{
 			Name:              conf.Name,
 			InputTopics:       conf.InputTopics,
+			OutputTopics:      conf.OutputTopics,
 			OutputDirectories: conf.OutputDirectories,
 			OutputTables:      conf.OutputTables,
 		}
