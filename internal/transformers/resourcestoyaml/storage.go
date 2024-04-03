@@ -7,7 +7,10 @@ import (
 	gcpresources "github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 )
 
-const defaultLocation = "US"
+const (
+	defaultArchiveFuncsName = "archive-funcs"
+	defaultLocation         = "US"
+)
 
 func (t *Transformer) buildStorageRelationship(source, storage resources.Resource) {
 	if gcpresources.ParseResourceType(source.ResourceType()) == gcpresources.Dataflow {
@@ -21,4 +24,8 @@ func (t *Transformer) buildStorages() (result []*config.Storage) {
 	}
 
 	return result
+}
+
+func (t *Transformer) appendArchiveFuncStorage(storages []*config.Storage) []*config.Storage {
+	return append([]*config.Storage{{Name: defaultArchiveFuncsName, Location: defaultLocation}}, storages...)
 }

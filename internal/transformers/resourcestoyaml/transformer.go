@@ -52,6 +52,10 @@ func (t *Transformer) Transform() (*config.Config, error) {
 	pubSubs := t.buildPubSubs()
 	storages := t.buildStorages()
 
+	if len(functions) > 0 {
+		storages = t.appendArchiveFuncStorage(storages)
+	}
+
 	return &config.Config{
 		AppEngines:     appEngines,
 		BigQueryTables: bigQueryTables,
