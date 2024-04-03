@@ -1,6 +1,6 @@
 package resourcestoyaml
 
-import "github.com/joselitofilho/gcp-terraform-generator/internal/resources"
+import "github.com/diagram-code-generator/resources/pkg/resources"
 
 func (t *Transformer) buildDataFlowToBigQuery(dataFlow, bq resources.Resource) {
 	dataFlowID := dataFlow.ID()

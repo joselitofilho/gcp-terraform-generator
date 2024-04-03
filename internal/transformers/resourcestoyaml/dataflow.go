@@ -1,8 +1,10 @@
 package resourcestoyaml
 
 import (
+	"github.com/diagram-code-generator/resources/pkg/resources"
+
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/config"
-	"github.com/joselitofilho/gcp-terraform-generator/internal/resources"
+	gcpresources "github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 )
 
 const (
@@ -11,13 +13,13 @@ const (
 )
 
 func (t *Transformer) buildDataFlowRelationship(source, dataFlow resources.Resource) {
-	if source.ResourceType() == resources.PubSub {
+	if gcpresources.ParseResourceType(source.ResourceType()) == gcpresources.PubSub {
 		t.buildPubSubToDataFlow(source, dataFlow)
 	}
 }
 
 func (t *Transformer) buildDataFlows() (result []*config.DataFlow) {
-	for _, df := range t.resourcesByTypeMap[resources.Dataflow] {
+	for _, df := range t.resourcesByTypeMap[gcpresources.Dataflow] {
 		inputTopics := []string{}
 		for _, ps := range t.inputPubSubByDataFlowID[df.ID()] {
 			inputTopics = append(inputTopics, ps.Value())

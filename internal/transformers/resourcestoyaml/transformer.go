@@ -1,8 +1,10 @@
 package resourcestoyaml
 
 import (
+	"github.com/diagram-code-generator/resources/pkg/resources"
+
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/config"
-	"github.com/joselitofilho/gcp-terraform-generator/internal/resources"
+	gcpresources "github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 )
 
 type Transformer struct {
@@ -16,7 +18,7 @@ type Transformer struct {
 	outputPubSubByDataFlowID map[string][]resources.Resource
 	storageByDataFlowID      map[string][]resources.Resource
 
-	resourcesByTypeMap map[resources.ResourceType][]resources.Resource
+	resourcesByTypeMap map[gcpresources.ResourceType][]resources.Resource
 }
 
 func NewTransformer(yamlConfig *config.Config, resc *resources.ResourceCollection) *Transformer {
@@ -31,7 +33,7 @@ func NewTransformer(yamlConfig *config.Config, resc *resources.ResourceCollectio
 		outputPubSubByDataFlowID: map[string][]resources.Resource{},
 		storageByDataFlowID:      map[string][]resources.Resource{},
 
-		resourcesByTypeMap: map[resources.ResourceType][]resources.Resource{},
+		resourcesByTypeMap: map[gcpresources.ResourceType][]resources.Resource{},
 	}
 }
 
@@ -58,7 +60,8 @@ func (t *Transformer) Transform() (*config.Config, error) {
 
 func (t *Transformer) buildResourcesByTypeMap() {
 	for _, resource := range t.resc.Resources {
-		t.resourcesByTypeMap[resource.ResourceType()] = append(t.resourcesByTypeMap[resource.ResourceType()], resource)
+		resType := gcpresources.ParseResourceType(resource.ResourceType())
+		t.resourcesByTypeMap[resType] = append(t.resourcesByTypeMap[resType], resource)
 	}
 }
 
@@ -67,16 +70,16 @@ func (t *Transformer) buildResourceRelationships() {
 		target := rel.Target
 		source := rel.Source
 
-		switch target.ResourceType() {
-		case resources.AppEngine:
+		switch gcpresources.ParseResourceType(target.ResourceType()) {
+		case gcpresources.AppEngine:
 			t.buildAppEngineRelationship(source, target)
-		case resources.BigQuery:
+		case gcpresources.BigQuery:
 			t.buildBigQueryRelationship(source, target)
-		case resources.Dataflow:
+		case gcpresources.Dataflow:
 			t.buildDataFlowRelationship(source, target)
-		case resources.PubSub:
+		case gcpresources.PubSub:
 			t.buildPubSubRelationship(source, target)
-		case resources.Storage:
+		case gcpresources.Storage:
 			t.buildStorageRelationship(source, target)
 		}
 	}

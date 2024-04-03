@@ -4,21 +4,24 @@ import (
 	"fmt"
 
 	"github.com/ettle/strcase"
+
+	"github.com/diagram-code-generator/resources/pkg/resources"
+
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/config"
-	"github.com/joselitofilho/gcp-terraform-generator/internal/resources"
+	gcpresources "github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 )
 
 func (t *Transformer) buildPubSubRelationship(source, pubSub resources.Resource) {
-	switch source.ResourceType() {
-	case resources.Dataflow:
+	switch gcpresources.ParseResourceType(source.ResourceType()) {
+	case gcpresources.Dataflow:
 		t.buildDataFlowToPubSub(source, pubSub)
-	case resources.IoTCore:
+	case gcpresources.IoTCore:
 		t.buildIoTCoreToPubSub(source, pubSub)
 	}
 }
 
 func (t *Transformer) buildPubSubs() (result []*config.PubSub) {
-	for _, ps := range t.resourcesByTypeMap[resources.PubSub] {
+	for _, ps := range t.resourcesByTypeMap[gcpresources.PubSub] {
 		var labels map[string]string
 		if len(t.appEngineByPubSubID[ps.ID()]) > 0 {
 			labels = map[string]string{}

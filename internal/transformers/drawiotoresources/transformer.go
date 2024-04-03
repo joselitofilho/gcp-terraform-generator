@@ -3,9 +3,10 @@ package drawiotoresources
 import (
 	"regexp"
 
+	"github.com/diagram-code-generator/resources/pkg/resources"
 	drawioxml "github.com/joselitofilho/drawio-parser-go/pkg/parser/xml"
 
-	"github.com/joselitofilho/gcp-terraform-generator/internal/resources"
+	gcpresources "github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 )
 
 // Transform parses resources from the MxFile.
@@ -57,21 +58,21 @@ func createResource(id, value, style string) resources.Resource {
 
 	switch {
 	case reAppEngine.MatchString(style):
-		return resources.NewGenericResource(id, value, resources.AppEngine)
+		return resources.NewGenericResource(id, value, gcpresources.AppEngine.String())
 	case reBigQuery.MatchString(style):
-		return resources.NewGenericResource(id, value, resources.BigQuery)
+		return resources.NewGenericResource(id, value, gcpresources.BigQuery.String())
 	case reCloudBigTable.MatchString(style):
-		return resources.NewGenericResource(id, value, resources.BigTable)
+		return resources.NewGenericResource(id, value, gcpresources.BigTable.String())
 	case reCloudFunction.MatchString(style):
-		return resources.NewGenericResource(id, value, resources.Function)
+		return resources.NewGenericResource(id, value, gcpresources.Function.String())
 	case reCloudStorage.MatchString(style):
-		return resources.NewGenericResource(id, value, resources.Storage)
+		return resources.NewGenericResource(id, value, gcpresources.Storage.String())
 	case reDataflow.MatchString(style):
-		return resources.NewGenericResource(id, value, resources.Dataflow)
+		return resources.NewGenericResource(id, value, gcpresources.Dataflow.String())
 	case resIoTCore.MatchString(style):
-		return resources.NewGenericResource(id, value, resources.IoTCore)
+		return resources.NewGenericResource(id, value, gcpresources.IoTCore.String())
 	case resPubSub.MatchString(style):
-		return resources.NewGenericResource(id, value, resources.PubSub)
+		return resources.NewGenericResource(id, value, gcpresources.PubSub.String())
 	default:
 		return nil
 	}
