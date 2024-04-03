@@ -40,8 +40,9 @@ func (ps *PubSub) Build() error {
 
 	for _, conf := range yamlConfig.PubSubs {
 		data := Data{
-			Name:   conf.Name,
-			Labels: conf.Labels,
+			Name:        conf.Name,
+			Labels:      conf.Labels,
+			PushEnpoint: conf.PushEnpoint,
 		}
 
 		if len(conf.Files) > 0 {

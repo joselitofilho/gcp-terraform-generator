@@ -33,7 +33,13 @@ func (t *Transformer) buildPubSubs() (result []*config.PubSub) {
 			}
 		}
 
-		result = append(result, &config.PubSub{Name: ps.Value(), Labels: labels})
+		var pushEndpoint string
+		fn, ok := t.functionByPubSubID[ps.ID()]
+		if ok {
+			pushEndpoint = fn.Value()
+		}
+
+		result = append(result, &config.PubSub{Name: ps.Value(), Labels: labels, PushEnpoint: pushEndpoint})
 	}
 
 	return result

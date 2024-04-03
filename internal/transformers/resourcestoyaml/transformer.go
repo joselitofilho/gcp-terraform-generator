@@ -14,7 +14,9 @@ type Transformer struct {
 	appEngineByBigTableID    map[string][]resources.Resource
 	appEngineByPubSubID      map[string][]resources.Resource
 	bqTablesByDataFlowID     map[string][]resources.Resource
+	functionByPubSubID       map[string]resources.Resource
 	pubSubByIoTCoreID        map[string][]resources.Resource
+	pubSubByFunctionID       map[string][]resources.Resource
 	inputPubSubByDataFlowID  map[string][]resources.Resource
 	outputPubSubByDataFlowID map[string][]resources.Resource
 	storageByDataFlowID      map[string][]resources.Resource
@@ -30,7 +32,9 @@ func NewTransformer(yamlConfig *config.Config, resc *resources.ResourceCollectio
 		appEngineByBigTableID:    map[string][]resources.Resource{},
 		appEngineByPubSubID:      map[string][]resources.Resource{},
 		bqTablesByDataFlowID:     map[string][]resources.Resource{},
+		functionByPubSubID:       map[string]resources.Resource{},
 		pubSubByIoTCoreID:        map[string][]resources.Resource{},
+		pubSubByFunctionID:       map[string][]resources.Resource{},
 		inputPubSubByDataFlowID:  map[string][]resources.Resource{},
 		outputPubSubByDataFlowID: map[string][]resources.Resource{},
 		storageByDataFlowID:      map[string][]resources.Resource{},
@@ -89,6 +93,8 @@ func (t *Transformer) buildResourceRelationships() {
 			t.buildBigTableRelationship(source, target)
 		case gcpresources.Dataflow:
 			t.buildDataFlowRelationship(source, target)
+		case gcpresources.Function:
+			t.buildFunctionRelationship(source, target)
 		case gcpresources.PubSub:
 			t.buildPubSubRelationship(source, target)
 		case gcpresources.Storage:

@@ -9,4 +9,8 @@ resource "google_pubsub_topic" "{{ToSnake $.Name}}_topic" {
 resource "google_pubsub_subscription" "{{ToSnake $.Name}}_subscription" {
   name  = "{{$.Name}}-subscription"
   topic = google_pubsub_topic.{{ToSnake $.Name}}_topic.name
+  {{if $.PushEnpoint }}
+  push_config {
+    push_endpoint = google_cloudfunctions_function.{{ToSnake $.PushEnpoint}}_function.https_trigger_url
+  }{{end}}
 }

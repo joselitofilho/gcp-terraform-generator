@@ -8,4 +8,5 @@ type Data struct {
 	SourceArchiveObject string
 	TriggerHTTP         string
 	EntryPoint          string
+	Envars              map[string]string
 }

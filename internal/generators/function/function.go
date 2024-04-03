@@ -47,6 +47,7 @@ func (ps *Function) Build() error {
 			SourceArchiveObject: conf.SourceArchiveObject,
 			TriggerHTTP:         conf.TriggerHTTP,
 			EntryPoint:          conf.EntryPoint,
+			Envars:              conf.Envars,
 		}
 
 		if len(conf.Files) > 0 {

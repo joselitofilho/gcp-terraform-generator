@@ -32,6 +32,14 @@ func (t *Transformer) buildPubSubToAppEngine(pubSub, appEngine resources.Resourc
 	t.appEngineByPubSubID[pubSubID] = append(t.appEngineByPubSubID[pubSubID], appEngine)
 }
 
+func (t *Transformer) buildPubSubToFunction(pubSub, function resources.Resource) {
+	pubSubID := pubSub.ID()
+	t.functionByPubSubID[pubSubID] = function
+
+	functionID := function.ID()
+	t.pubSubByFunctionID[functionID] = append(t.pubSubByFunctionID[functionID], pubSub)
+}
+
 func (t *Transformer) buildPubSubToDataFlow(pubSub, dataFlow resources.Resource) {
 	dataFlowID := dataFlow.ID()
 	t.inputPubSubByDataFlowID[dataFlowID] = append(t.inputPubSubByDataFlowID[dataFlowID], pubSub)
