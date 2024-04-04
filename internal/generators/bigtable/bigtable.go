@@ -38,6 +38,8 @@ func (ps *BigTable) Build() error {
 	templates := utils.MergeStringMap(defaultTfTemplateFiles,
 		generators.CreateTemplatesMap(yamlConfig.OverrideDefaultTemplates.BigTable))
 
+	tg := generators.NewGenerator()
+
 	for _, conf := range yamlConfig.BigTables {
 		data := Data{
 			Name:   conf.Name,
@@ -47,17 +49,14 @@ func (ps *BigTable) Build() error {
 		if len(conf.Files) > 0 {
 			filesConf := generators.CreateFilesMap(conf.Files)
 
-			err = generators.GenerateFiles(nil, filesConf, data, modPath)
-			if err != nil {
-				return fmt.Errorf("%w", err)
-			}
+			generators.MustGenerateFiles(tg, nil, filesConf, data, modPath)
 
 			fmtcolor.White.Printf("Big Table '%s' has been generated successfully\n", conf.Name)
 
 			continue
 		}
 
-		output, err := generators.Build(data, "bigtable-tf-template", templates[filenameBigTabletf])
+		output, err := tg.Build(data, "bigtable-tf-template", templates[filenameBigTabletf])
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
@@ -68,10 +67,7 @@ func (ps *BigTable) Build() error {
 	if len(result) > 0 {
 		outputFile := path.Join(modPath, filenameBigTabletf)
 
-		err := generators.GenerateFile(nil, filenameBigTabletf, strings.Join(result, "\n"), outputFile, Data{})
-		if err != nil {
-			return fmt.Errorf("%w", err)
-		}
+		generators.MustGenerateFile(tg, nil, filenameBigTabletf, strings.Join(result, "\n"), outputFile, Data{})
 
 		fmtcolor.White.Println("Big Table has been generated successfully")
 	}

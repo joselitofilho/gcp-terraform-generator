@@ -38,6 +38,8 @@ func (ps *AppEngine) Build() error {
 	templates := utils.MergeStringMap(defaultTfTemplateFiles,
 		generators.CreateTemplatesMap(yamlConfig.OverrideDefaultTemplates.AppEngine))
 
+	tg := generators.NewGenerator()
+
 	for _, conf := range yamlConfig.AppEngines {
 		data := Data{
 			Name:       conf.Name,
@@ -47,17 +49,14 @@ func (ps *AppEngine) Build() error {
 		if len(conf.Files) > 0 {
 			filesConf := generators.CreateFilesMap(conf.Files)
 
-			err = generators.GenerateFiles(nil, filesConf, data, modPath)
-			if err != nil {
-				return fmt.Errorf("%w", err)
-			}
+			generators.MustGenerateFiles(tg, nil, filesConf, data, modPath)
 
 			fmtcolor.White.Printf("App Engine '%s' has been generated successfully\n", conf.Name)
 
 			continue
 		}
 
-		output, err := generators.Build(data, "appengine-tf-template", templates[filenameAppEnginetf])
+		output, err := tg.Build(data, "appengine-tf-template", templates[filenameAppEnginetf])
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
@@ -68,10 +67,7 @@ func (ps *AppEngine) Build() error {
 	if len(result) > 0 {
 		outputFile := path.Join(modPath, filenameAppEnginetf)
 
-		err := generators.GenerateFile(nil, filenameAppEnginetf, strings.Join(result, "\n"), outputFile, Data{})
-		if err != nil {
-			return fmt.Errorf("%w", err)
-		}
+		generators.MustGenerateFile(tg, nil, filenameAppEnginetf, strings.Join(result, "\n"), outputFile, Data{})
 
 		fmtcolor.White.Println("App Engine has been generated successfully")
 	}

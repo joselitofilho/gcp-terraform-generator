@@ -43,6 +43,8 @@ func (ps *Storage) Build() error {
 	templates := utils.MergeStringMap(defaultTfTemplateFiles,
 		generators.CreateTemplatesMap(yamlConfig.OverrideDefaultTemplates.Storage))
 
+	tg := generators.NewGenerator()
+
 	for _, conf := range yamlConfig.Storages {
 		data := Data{
 			Name:     conf.Name,
@@ -52,17 +54,14 @@ func (ps *Storage) Build() error {
 		if len(conf.Files) > 0 {
 			filesConf := generators.CreateFilesMap(conf.Files)
 
-			err = generators.GenerateFiles(nil, filesConf, data, modPath)
-			if err != nil {
-				return fmt.Errorf("%w", err)
-			}
+			generators.MustGenerateFiles(tg, nil, filesConf, data, modPath)
 
 			fmtcolor.White.Printf("Storage '%s' has been generated successfully\n", conf.Name)
 
 			continue
 		}
 
-		output, err := generators.Build(data, "storage-tf-template", templates[filenameStoragetf])
+		output, err := tg.Build(data, "storage-tf-template", templates[filenameStoragetf])
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
@@ -73,10 +72,7 @@ func (ps *Storage) Build() error {
 	if len(result) > 0 {
 		outputFile := path.Join(modPath, filenameStoragetf)
 
-		err := generators.GenerateFile(nil, filenameStoragetf, strings.Join(result, "\n"), outputFile, Data{})
-		if err != nil {
-			return fmt.Errorf("%w", err)
-		}
+		generators.MustGenerateFile(tg, nil, filenameStoragetf, strings.Join(result, "\n"), outputFile, Data{})
 
 		fmtcolor.White.Println("Storage has been generated successfully")
 	}

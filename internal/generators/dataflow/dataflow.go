@@ -38,6 +38,8 @@ func (c *DataFlow) Build() error {
 	templates := utils.MergeStringMap(defaultTfTemplateFiles,
 		generators.CreateTemplatesMap(yamlConfig.OverrideDefaultTemplates.DataFlow))
 
+	tg := generators.NewGenerator()
+
 	for _, conf := range yamlConfig.DataFlows {
 		data := Data{
 			Name:              conf.Name,
@@ -50,17 +52,14 @@ func (c *DataFlow) Build() error {
 		if len(conf.Files) > 0 {
 			filesConf := generators.CreateFilesMap(conf.Files)
 
-			err = generators.GenerateFiles(nil, filesConf, data, modPath)
-			if err != nil {
-				return fmt.Errorf("%w", err)
-			}
+			generators.MustGenerateFiles(tg, nil, filesConf, data, modPath)
 
 			fmtcolor.White.Printf("DataFlow '%s' has been generated successfully\n", conf.Name)
 
 			continue
 		}
 
-		output, err := generators.Build(data, "dataflow-tf-template", templates[filenameDataFlowtf])
+		output, err := tg.Build(data, "dataflow-tf-template", templates[filenameDataFlowtf])
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
@@ -71,10 +70,7 @@ func (c *DataFlow) Build() error {
 	if len(result) > 0 {
 		outputFile := path.Join(modPath, filenameDataFlowtf)
 
-		err := generators.GenerateFile(nil, filenameDataFlowtf, strings.Join(result, "\n"), outputFile, Data{})
-		if err != nil {
-			return fmt.Errorf("%w", err)
-		}
+		generators.MustGenerateFile(tg, nil, filenameDataFlowtf, strings.Join(result, "\n"), outputFile, Data{})
 
 		fmtcolor.White.Println("DataFlow has been generated successfully")
 	}
