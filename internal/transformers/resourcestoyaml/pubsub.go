@@ -42,8 +42,7 @@ func (t *Transformer) buildPubSubs() (result []*config.PubSub) {
 		}
 
 		var pushEndpoint string
-		fn, ok := t.functionSubscriberByPubSubID[ps.ID()]
-		if ok {
+		if fn, ok := t.functionSubscriberByPubSubID[ps.ID()]; ok {
 			pushEndpoint = fn.Value()
 		}
 

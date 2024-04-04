@@ -45,6 +45,7 @@ func (ps *BigQuery) Build() error {
 		if len(nameParts) > 1 {
 			dataset = nameParts[0]
 		}
+
 		table := nameParts[len(nameParts)-1]
 
 		data := Data{
