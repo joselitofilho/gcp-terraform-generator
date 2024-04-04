@@ -1,0 +1,66 @@
+structure:
+  stacks:
+    - name: mystack
+      folders:
+        - name: dev
+          files:
+            - name: main.tf
+            - name: terragrunt.hcl
+            - name: vars.tf
+        - name: uat
+          files:
+            - name: main.tf
+            - name: terragrunt.hcl
+            - name: vars.tf
+        - name: prd
+          files:
+            - name: main.tf
+            - name: terragrunt.hcl
+            - name: vars.tf
+        - name: mod
+          files:
+            - name: main.tf
+              tmpl: |-
+                locals {
+                  stack_name = "{{$.StackName}}-${var.environment}"
+                }
+            - name: vars.tf
+        - name: functions
+  default_templates:
+    - main.tf: |-
+        terraform {
+          required_providers {
+            google = {
+              source  = "hashicorp/google"
+              version = "~> 4.84"
+            }
+          }
+        }
+
+        provider "google" {
+          project = var.project_id
+          zone    = var.zone
+          region  = var.region
+        }
+
+      terragrunt.hcl: |-
+        include {
+          path = find_in_parent_folders()
+        }
+
+      vars.tf: |-
+        variable "project_id" {
+          type = string
+        }
+
+        variable "zone" {
+          type = string
+        }
+
+        variable "region" {
+          type = string
+        }
+
+        variable "environment" {
+          type = string
+        }
