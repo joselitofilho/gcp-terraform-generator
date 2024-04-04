@@ -11,7 +11,7 @@ import (
 
 const (
 	defaultSource                    = "."
-	defaultRuntime                   = "go116"
+	defaultRuntime                   = "go1.x"
 	defaultSourceArchiveBucket       = "${google_storage_bucket.archive_funcs_bucket.name}"
 	defaultSourceArchiveObjectFormat = "${google_storage_bucket_object.%s_archive_funcs_object.name}"
 	defaultTriggerHTTP               = "true"

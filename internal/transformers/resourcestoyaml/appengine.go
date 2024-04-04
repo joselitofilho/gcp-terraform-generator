@@ -7,7 +7,7 @@ import (
 	gcpresources "github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 )
 
-const defaultProjectID = "us-central"
+const defaultProjectID = "${var.project_id}"
 
 func (t *Transformer) buildAppEngineRelationship(source, appEngine resources.Resource) {
 	if gcpresources.ParseResourceType(source.ResourceType()) == gcpresources.PubSub {

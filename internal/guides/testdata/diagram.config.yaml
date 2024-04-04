@@ -1,0 +1,5 @@
+diagram:
+  stack_name: location
+  lambda:
+    source: .
+    runtime: go1.x
