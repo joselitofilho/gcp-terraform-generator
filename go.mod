@@ -4,7 +4,7 @@ go 1.21.6
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/diagram-code-generator/resources v1.0.1
+	github.com/diagram-code-generator/resources v1.1.0
 	github.com/diagram-code-generator/template v1.0.0
 	github.com/ettle/strcase v0.2.0
 	github.com/fatih/color v1.16.0
