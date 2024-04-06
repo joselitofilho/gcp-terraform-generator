@@ -3,6 +3,7 @@ package diagram
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/diagram-code-generator/resources/pkg/transformers/drawiotoresources"
 
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/config"
+	generatorserrs "github.com/joselitofilho/gcp-terraform-generator/internal/generators/errors"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/transformers/resourcestoyaml"
 )
@@ -28,18 +30,15 @@ func NewDiagram(diagramFilename, configFilename, output string) *Diagram {
 func (d *Diagram) Build() error {
 	yamlConfig, err := config.NewYAML(d.configFilename).Parse()
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("%w: %s", generatorserrs.ErrYAMLParser, err)
 	}
 
 	mxFile, err := drawioxml.Parse(d.diagramFilename)
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("%w: %s", generatorserrs.ErrDrawIOParser, err)
 	}
 
-	resources, err := drawiotoresources.Transform(mxFile, &resources.GCPResourceFactory{})
-	if err != nil {
-		return fmt.Errorf("%w", err)
-	}
+	resources, _ := drawiotoresources.NewTransformer(mxFile, &resources.GCPResourceFactory{}).Transform()
 
 	yamlConfigOut, err := resourcestoyaml.NewTransformer(yamlConfig, resources).Transform()
 	if err != nil {
@@ -50,6 +49,9 @@ func (d *Diagram) Build() error {
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
+
+	outputDir, _ := filepath.Split(d.output)
+	_ = os.MkdirAll(filepath.Base(outputDir), os.ModePerm)
 
 	err = os.WriteFile(d.output, data, os.ModePerm)
 	if err != nil {

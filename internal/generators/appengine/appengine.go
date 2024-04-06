@@ -27,7 +27,7 @@ func (ps *AppEngine) Build() error {
 
 	yamlConfig, err := yamlParser.Parse()
 	if err != nil {
-		return fmt.Errorf("%w: %w", generatorserrs.ErrYAMLParse, err)
+		return fmt.Errorf("%w: %w", generatorserrs.ErrYAMLParser, err)
 	}
 
 	modPath := path.Join(ps.output, "mod")
