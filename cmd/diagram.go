@@ -12,20 +12,9 @@ var diagramCmd = &cobra.Command{
 	Use:   "diagram",
 	Short: "Manage Diagram",
 	Run: func(cmd *cobra.Command, _ []string) {
-		diagramFilename, err := cmd.Flags().GetString(flagDiagram)
-		if err != nil {
-			printErrorAndExit(err)
-		}
-
-		configFile, err := cmd.Flags().GetString(flagConfig)
-		if err != nil {
-			printErrorAndExit(err)
-		}
-
-		output, err := cmd.Flags().GetString(flagOutput)
-		if err != nil {
-			printErrorAndExit(err)
-		}
+		diagramFilename, _ := cmd.Flags().GetString(flagDiagram)
+		configFile, _ := cmd.Flags().GetString(flagConfig)
+		output, _ := cmd.Flags().GetString(flagOutput)
 
 		if err := diagram.NewDiagram(diagramFilename, configFile, output).Build(); err != nil {
 			printErrorAndExit(err)

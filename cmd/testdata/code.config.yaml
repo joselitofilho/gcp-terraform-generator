@@ -1,0 +1,7 @@
+appengines:
+  - name: "myEngine"
+    location_id: "us-central"
+    files:
+      - name: "my-engine.tf"
+        tmpl: |-
+          resource "google_app_engine_application" "{{ToSnake $.Name}}_app" {}

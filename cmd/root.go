@@ -36,15 +36,14 @@ var (
 	ErrNoDiagramOrConfigFiles = errors.New("this directory does not contain any diagram or config files")
 )
 
+var osExit = os.Exit
+
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:   "gcp-terraform-generator",
 	Short: "GCP terraform generator",
 	Run: func(cmd *cobra.Command, _ []string) {
-		workdir, err := cmd.Flags().GetString(flagWorkdir)
-		if err != nil {
-			printErrorAndExit(err)
-		}
+		workdir, _ := cmd.Flags().GetString(flagWorkdir)
 
 		title := `
 
@@ -164,5 +163,5 @@ func init() {
 
 func printErrorAndExit(err error) {
 	fmtcolor.Red.Printf("🚨 %s\n", err)
-	os.Exit(1)
+	osExit(1)
 }

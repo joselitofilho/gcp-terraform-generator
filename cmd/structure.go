@@ -11,18 +11,10 @@ var structureCmd = &cobra.Command{
 	Use:   "structure",
 	Short: "Manage Structure",
 	Run: func(cmd *cobra.Command, _ []string) {
-		config, err := cmd.Flags().GetString(flagConfig)
-		if err != nil {
-			printErrorAndExit(err)
-		}
+		config, _ := cmd.Flags().GetString(flagConfig)
+		output, _ := cmd.Flags().GetString(flagOutput)
 
-		output, err := cmd.Flags().GetString(flagOutput)
-		if err != nil {
-			printErrorAndExit(err)
-		}
-
-		err = structure.NewStructure(config, output).Build()
-		if err != nil {
+		if err := structure.NewStructure(config, output).Build(); err != nil {
 			printErrorAndExit(err)
 		}
 	},
