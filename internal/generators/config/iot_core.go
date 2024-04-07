@@ -1,5 +1,9 @@
 package config
 
+type EventNotificationConfig struct {
+	TopicName string `yaml:"pubsub_topic_name"`
+}
+
 type IoTCore struct {
 	Name                     string                    `yaml:"name"`
 	EventNotificationConfigs []EventNotificationConfig `yaml:"event_notification_configs,omitempty"`
@@ -7,7 +11,3 @@ type IoTCore struct {
 }
 
 func (r *IoTCore) GetName() string { return r.Name }
-
-type EventNotificationConfig struct {
-	TopicName string `yaml:"pubsub_topic_name"`
-}

@@ -1,7 +1,7 @@
 package config
 
 type OverrideDefaultTemplates struct {
-	AppEngine []FilenameTemplateMap `yaml:"bigquery,omitempty"`
+	AppEngine []FilenameTemplateMap `yaml:"appengine,omitempty"`
 	BigQuery  []FilenameTemplateMap `yaml:"bigquery,omitempty"`
 	BigTable  []FilenameTemplateMap `yaml:"bigtable,omitempty"`
 	DataFlow  []FilenameTemplateMap `yaml:"dataflow,omitempty"`

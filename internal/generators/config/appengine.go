@@ -2,7 +2,7 @@ package config
 
 type AppEngine struct {
 	Name       string `yaml:"name"`
-	LocationID string `yaml:"location_id,omitempty"`
+	LocationID string `yaml:"location_id"`
 	Files      []File `yaml:"files,omitempty"`
 }
 
