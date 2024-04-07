@@ -234,7 +234,7 @@ iotcores:
   - name: "core"
     # Optional. List of configurations for event notifications, such as PubSub topics to publish device events to.
     event_notification_configs:
-      # PubSub topic name to publish device state updates.
+      # Pub Sub topic name to publish device state updates.
       - pubsub_topic_name: google_pubsub_topic.pubsub_topic.id
     # Optional. List of files that we can customize.
     files:
@@ -245,7 +245,7 @@ iotcores:
 
 # Configurations for Pub Subs.
 pubsubs:
-  # Name of the Pub Sub.
+  # Name of the Pub Sub topic.
   - name: "pubsub"
     # Optional. A set of key/value label pairs to assign to this Topic.
     labels:

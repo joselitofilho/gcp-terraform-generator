@@ -13,11 +13,6 @@ import (
 	"github.com/joselitofilho/gcp-terraform-generator/internal/utils"
 )
 
-type Data struct {
-	Name     string
-	Location string
-}
-
 type Storage struct {
 	configFileName string
 	output         string
