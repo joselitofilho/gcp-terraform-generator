@@ -1,0 +1,275 @@
+# Configuration for overriding default templates.
+override_default_templates:
+  # Templates for App Engine.
+  appengine:
+    - appengine.tf: |-
+        resource "google_app_engine_application" "{{ToSnake $.Name}}_app" {}
+  # Templates for Big Query.
+  bigquery:
+    - bigquery.tf: |-
+        resource "google_bigquery_table" "{{ToSnake $.Dataset}}_{{ToSnake $.Table}}_table" {}
+  # Templates for Big Table.
+  bigtable:
+    - bigtable.tf: |-
+        resource "google_bigtable_instance" "{{ToSnake $.Name}}_instance" {}
+  # Templates for DataFlow.
+  dataflow:
+    - dataflow.tf: |-
+        resource "google_dataflow_job" "{{ToSnake $.Name}}_df_job" {}
+  # Templates for Function.
+  function:
+    - function.tf: |-
+        resource "google_cloudfunctions_function" "{{ToSnake $.Name}}_function" {}
+  # Templates for IoT Core.
+  iotcore:
+    - iotcore.tf: |-
+        resource "google_cloudiot_registry" "{{ToSnake $.Name}}_registry" {}
+  # Templates for Pub Sub.
+  pubsub:
+    - pubsub.tf: |-
+        resource "google_pubsub_topic" "{{ToSnake $.Name}}_topic" {}
+  # Templates for Storage.
+  storage:
+    - storage.tf: |-
+        resource "google_storage_bucket" "{{ToSnake $.Name}}_bucket" {}
+
+# Diagram configurations include modules to specify the URL pointing to the GitHub repository for the resources module.
+diagram:
+  # To specify the stack name for the diagram.
+  stack_name: mystack
+
+# Structure for managing stacks with multiple environments.
+structure:
+  # Stacks section. Each stack configuration includes folders for different environments (`dev`, `uat`, `prd`, etc.),
+  # default templates, and specific configurations for IoT cores, pub subs, big tables, and more.
+  stacks:
+    - name: mystack
+      # Folders for different environments.
+      folders:
+        # Development environment.
+        - name: dev
+          # Terraform configuration files for the development environment.
+          files:
+            - name: main.tf
+            - name: terragrunt.hcl
+            - name: vars.tf
+        # User Acceptance Testing environment.
+        - name: uat
+          # Terraform configuration files for the User Acceptance Testing environment.
+          files:
+            - name: main.tf
+            - name: terragrunt.hcl
+            - name: vars.tf
+        # Production environment.
+        - name: prd
+          # Terraform configuration files for the production environment.
+          files:
+            - name: main.tf
+            - name: terragrunt.hcl
+            - name: vars.tf
+        # Common module.
+        - name: mod
+          # Terraform configuration files for the common module.
+          files:
+            - name: main.tf
+              # Template for generating stack_name based on environment.
+              tmpl: |-
+                locals {
+                  stack_name = "{{$.StackName}}-${var.environment}"
+                }
+            - name: vars.tf
+        # Cloud Functions.
+        - name: functions
+        # Placeholder folder for any other configurations.
+        - name: anyFolder
+          # Files within the arbitrary folder.
+          files:
+            - name: anyFile.txt
+      # Files in the root folder.
+      files:
+        - name: anyRootFile.txt
+
+  # Default templates are provided for creating stacks. These templates include backend configuration, provider
+  # configuration, module instantiation, and variable definitions.
+  default_templates:
+    - main.tf: |-
+        terraform {
+          required_providers {
+            google = {
+              source  = "hashicorp/google"
+              version = "~> 4.84"
+            }
+          }
+        }
+
+        provider "google" {
+          project = var.project_id
+          zone    = var.zone
+          region  = var.region
+        }
+
+      terragrunt.hcl: |-
+        include {
+          path = find_in_parent_folders()
+        }
+
+      vars.tf: |-
+        variable "project_id" {
+          type = string
+        }
+
+        variable "zone" {
+          type = string
+        }
+
+        variable "region" {
+          type = string
+        }
+
+        variable "environment" {
+          type = string
+        }
+
+# Configurations for App Engine.
+appengines:
+  # Name of the App Engine.
+  - name: "myEngine"
+    # The location to serve the app from.
+    location_id: "us-central"
+    # Optional. List of files that we can customize.
+    files:
+      - name: "my-engine.tf"
+        # Template for the Terraform file defining the App Engine resource.
+        tmpl: |-
+          resource "google_app_engine_application" "{{ToSnake $.Name}}_app" {}
+
+# Configurations for Big Query.
+bigquery:
+  # Name of the Big Query. The first part is optional and reprensents the dataset.
+  - name: "myDataset.myTable"
+    # Optional. A JSON schema for the table.
+    schema: |-
+      <<EOF
+        # Define your Big Query schema here
+      EOF
+    # Optional. List of files that we can customize
+    files:
+      - name: "my-table.tf"
+        # Template for the Terraform file defining the Big Query resource.
+        tmpl: |-
+          resource "google_bigquery_table" "{{ToSnake $.Dataset}}_{{ToSnake $.Table}}_table" {}
+
+# Configurations for Big Tables.
+bigtables:
+  # Name of the Big Table.
+  - name: "myBigTable"
+    # Optional. A map of key/value label pairs to assign to the resource.
+    labels:
+      label1: value1
+      label2: value2
+    # Optional. List of files that we can customize.
+    files:
+      - name: "my-big-table.tf"
+        # Template for the Terraform file defining the Big Table resource.
+        tmpl: |-
+          resource "google_bigtable_instance" "{{ToSnake $.Name}}_instance" {}
+
+# Configurations for DataFlows.
+dataflows:
+  # Name of the DataFlow.
+  - name: "dataflow"
+    # The GCS path to the Dataflow job template.
+    template_gcs_path: "gs://example-bucket/dataflow-template"
+    # A writeable location on GCS for the Dataflow job to dump its temporary data.
+    temp_gcs_location: "gs://example-bucket/temp"
+    # Optional. Input topics for the DataFlow.
+    input_topics:
+      - "projects/example-project/topics/input-topic"
+    # Optional. Output topics for the DataFlow.
+    output_topics:
+      - "projects/example-project/topics/output-topic"
+    # Optional. Output directories for the DataFlow.
+    output_directories:
+      - "gs://example-bucket/output"
+    # Optional. Output tables for the DataFlow.
+    output_tables:
+      - "project:dataset.table"
+    # Optional. List of files that we can customize.
+    files:
+      - name: "my-job.tf"
+        # Template for the Terraform file defining the DataFlow resource.
+        tmpl: |-
+          resource "google_dataflow_job" "{{ToSnake $.Name}}_df_job" {}
+
+# Configurations for Functions.
+functions:
+  # Name of the function.
+  - name: "func"
+    # Source of the function code.
+    source: "."
+    # The runtime in which the function is going to run.
+    runtime: "go116"
+    # Optional. The GCS bucket containing the zip archive which contains the function.
+    source_archive_bucket: "example-bucket"
+    # Optional. The source archive object (file) in archive bucket.
+    source_archive_object: "function.zip"
+    # Optional. Any HTTP request (of a supported type) to the endpoint will trigger function execution.
+    trigger_http: "true"
+    # Optional. Name of the function that will be executed when the Google Cloud Function is triggered.
+    entry_point: "ExampleFunction"
+    # Optional. A map of key/value environment variable pairs to assign to the function.
+    envars:
+      ENV_VAR1: "value1"
+      ENV_VAR2: "value2"
+    # Optional. List of files that we can customize.
+    files:
+      - name: "function.tf"
+        # Template for the Terraform file defining the Function resource.
+        tmpl: |-
+          resource "google_cloudfunctions_function" "{{ToSnake $.Name}}_function" {}
+
+# Configurations for IoT Cores.
+iotcores:
+  # Name of the IoT Core.
+  - name: "core"
+    # Optional. List of configurations for event notifications, such as PubSub topics to publish device events to.
+    event_notification_configs:
+      # PubSub topic name to publish device state updates.
+      - pubsub_topic_name: google_pubsub_topic.pubsub_topic.id
+    # Optional. List of files that we can customize.
+    files:
+      - name: "my-iotcore.tf"
+        # Template for the Terraform file defining the IoT Core resource.
+        tmpl: |-
+          resource "google_cloudiot_registry" "{{ToSnake $.Name}}_registry" {}
+
+# Configurations for Pub Subs.
+pubsubs:
+  # Name of the Pub Sub.
+  - name: "pubsub"
+    # Optional. A set of key/value label pairs to assign to this Topic.
+    labels:
+      foo: "bar"
+    # Optional. If push delivery is used with this subscription, this field is used to configure it. An empty value
+    # signifies that the subscriber will pull and ack messages using API methods. Otherwise, a URL locating the endpoint
+    # to which messages should be pushed.
+    push_endpoint: google_cloudfunctions_function.func_function.https_trigger_url
+    # Optional. List of files that we can customize.
+    files:
+      - name: "my-iotcore.tf"
+        # Template for the Terraform file defining the Pub Sub resource.
+        tmpl: |-
+          resource "google_pubsub_topic" "{{ToSnake $.Name}}_topic" {}
+
+# Configurations for Storages.
+storages:
+  # Name of the storage.
+  - name: "storage"
+    # The GCS location.
+    location: "US"
+    # Optional. List of files that we can customize.
+    files:
+      - name: "my-storage.tf"
+        # Template for the Terraform file defining the Storage resource.
+        tmpl: |-
+          resource "google_storage_bucket" "{{ToSnake $.Name}}_bucket" {}

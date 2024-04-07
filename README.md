@@ -72,7 +72,7 @@ The GCP Terraform Generator is a powerful tool designed to simplify and streamli
 </div>
 
 ```bash
-$ gcp-terraform-generator --workdir ./example
+$ gcp-terraform-generator --workdir ./examples/diagram-as-code
 ```
 
 ## How it works
