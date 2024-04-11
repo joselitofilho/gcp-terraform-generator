@@ -6,6 +6,7 @@ type Resource interface {
 
 // Config represents a configuration object that can be populated from a YAML file.
 type Config struct {
+	Draw                     Draw                     `yaml:"draw,omitempty"`
 	OverrideDefaultTemplates OverrideDefaultTemplates `yaml:"override_default_templates,omitempty"`
 	Diagram                  *Diagram                 `yaml:"diagram,omitempty"`
 	Structure                *Structure               `yaml:"structure,omitempty"`

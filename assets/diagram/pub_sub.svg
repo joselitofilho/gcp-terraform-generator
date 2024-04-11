@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 18.31999969482422 20.000001907348633" height="40" width="36"
+    xmlns="http://www.w3.org/2000/svg" x="119.5" y="79.5" style="font-family: initial;">
+    <style type="text/css">
+        .st0 { fill: rgb(102, 157, 246); }
+        .st1 { fill: rgb(66, 133, 244); }
+        .st2 { fill: rgb(174, 203, 250); }
+    </style>
+    <defs>
+        <filter color-interpolation-filters="sRGB"
+            filterUnits="userSpaceOnUse" height="12.76" width="14.73" y="4.19" x="4.64" id="A">
+            <feFlood flood-color="#fff" />
+            <feBlend in="SourceGraphic" />
+        </filter>
+        <mask maskUnits="userSpaceOnUse" height="12.76" width="14.73" y="4.19" x="4.64" id="B">
+            <circle filter="url(#A)" r="3.58" cy="12.23" cx="12" />
+        </mask>
+    </defs>
+    <g class="st0">
+        <circle r="1.72" cy="6.21" cx="16.13" />
+        <circle r="1.72" cy="6.21" cx="2.19" />
+        <circle r="1.72" cy="18.28" cx="9.16" />
+    </g>
+    <g
+        transform="translate(-2.84 -2)" mask="url(#B)">
+        <path class="st1"
+            d="M14.69 10.22h1.59v8.04h-1.59z"
+            transform="matrix(.5 -.87 .87 .5 -4.59 20.53)" />
+        <path class="st1"
+            d="M4.49 13.45h8.04v1.59H4.49z"
+            transform="rotate(330 8.523 14.244)" />
+        <path class="st1"
+            d="M11.2 4.19h1.59v8.04H11.2z" />
+    </g>
+    <g class="st2">
+        <circle r="2.78" cy="10.23" cx="9.16" />
+        <circle r="2.19" cy="14.25" cx="2.19" />
+        <circle r="2.19" cy="14.25" cx="16.13" />
+        <circle r="2.19" cy="2.19" cx="9.16" />
+    </g>
+</svg>

@@ -178,6 +178,8 @@ Configuration for App Engine resources.
 appengines:
   # Name of the App Engine.
   - name: "myEngine"
+    # The project ID to create the application under.
+    project: "${var.project_id}"
     # The location to serve the app from.
     location_id: "us-central"
     # Optional. List of files that we can customize.

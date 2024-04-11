@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 20 19.989999771118164" height="40" width="40"
+    xmlns="http://www.w3.org/2000/svg" x="359.5" y="79.5" style="font-family: initial;">
+    <style type="text/css">
+        .st0 { fill: rgb(66, 133, 244); }
+        .st1 { fill: rgb(102, 157, 246); }
+        .st2 { fill: rgb(174, 203, 250); }
+    </style>
+    <path class="st1"
+        d="M3 3.99L0 6.42v7.13l3 2.44z" />
+    <path class="st0"
+        d="M3 3.99l-3 4 3-2zm-3 8l3 4v-2z" />
+    <path class="st2"
+        d="M0 15.99l4 4 2-2-6-6zm.01-8L5.99 2l-2-2L0 3.99z" />
+    <path class="st1"
+        d="M17 16l3-2.42V6.44L17 4z" />
+    <path class="st0"
+        d="M17 16l3-4-3 2zm3-8l-3-4v2z" />
+    <g class="st2">
+        <path d="M20 4l-4-4-2 2 6 6zm-.01 8l-5.98 5.99 2 2L20 16z" />
+        <circle r="1" cy="9.99" cx="6" />
+        <circle r="1" cy="9.99" cx="10" />
+        <circle r="1" cy="9.99" cx="13.99" />
+    </g>
+</svg>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 20 16" height="32" width="40" xmlns="http://www.w3.org/2000/svg"
+    x="359.5" y="239.5" style="font-family: initial;">
+    <style type="text/css">
+        .st0 { fill: rgb(66, 133, 244); }
+        .st1 { fill: rgb(102, 157, 246); }
+        .st2 { fill: rgb(174, 203, 250); }
+        .st3 { fill: rgb(255, 255, 255); }
+    </style>
+    <path d="M0 0h20v7H0z" class="st2" />
+    <path d="M18 0h2v7h-2z" class="st1" />
+    <path d="M18 7l2-7h-2z" class="st0" />
+    <path d="M0 0h2v7H0z" class="st1" />
+    <g class="st3">
+        <path d="M4 3h6v1H4z" />
+        <rect rx="1.5" height="3" width="3" y="2" x="13" />
+    </g>
+    <path d="M0 9h20v7H0z" class="st2" />
+    <path d="M18 9h2v7h-2z" class="st1" />
+    <path d="M18 16l2-7h-2z" class="st0" />
+    <path d="M0 9h2v7H0z" class="st1" />
+    <g class="st3">
+        <path d="M4 12h6v1H4z" />
+        <rect rx="1.5" height="3" width="3" y="11" x="13" />
+    </g>
+</svg>

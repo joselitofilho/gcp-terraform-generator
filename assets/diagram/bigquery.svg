@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 20.00104522705078 20.00104522705078" fill-rule="evenodd" height="40"
+    width="40" xmlns="http://www.w3.org/2000/svg" x="359.5" y="159.5" style="font-family: initial;">
+    <style type="text/css">
+        .st0 { fill: rgb(174, 203, 250); }
+        .st1 { fill: rgb(102, 157, 246); }
+        .st2 { fill: rgb(66, 133, 244); }
+    </style>
+    <path class="st0"
+        d="M4.73 8.83v2.63a4.91 4.91 0 0 0 1.71 1.74V8.83z" />
+    <path class="st1"
+        d="M7.89 6.41v7.53A7.62 7.62 0 0 0 9 14a8 8 0 0 0 1 0V6.41z" />
+    <path class="st0"
+        d="M11.64 9.86v3.29a5 5 0 0 0 1.7-1.82V9.86z" />
+    <path class="st2"
+        d="M15.74 14.32l-1.42 1.42a.42.42 0 0 0 0 .6l3.54 3.54a.42.42 0 0 0 .59 0l1.43-1.43a.42.42 0 0 0 0-.59l-3.54-3.54a.42.42 0 0 0-.6 0" />
+    <path class="st1"
+        d="M9 0a9 9 0 1 0 0 18A9 9 0 1 0 9 0m0 15.69a6.68 6.68 0 0 1 .007-13.36 6.68 6.68 0 0 1 4.727 11.403A6.68 6.68 0 0 1 9 15.69" />
+</svg>

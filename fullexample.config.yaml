@@ -37,6 +37,7 @@ override_default_templates:
 diagram:
   # To specify the stack name for the diagram.
   stack_name: mystack
+  default_location: US
 
 # Structure for managing stacks with multiple environments.
 structure:
@@ -134,6 +135,8 @@ structure:
 appengines:
   # Name of the App Engine.
   - name: "myEngine"
+    # The project ID to create the application under.
+    project: "${var.project_id}"
     # The location to serve the app from.
     location_id: "us-central"
     # Optional. List of files that we can customize.

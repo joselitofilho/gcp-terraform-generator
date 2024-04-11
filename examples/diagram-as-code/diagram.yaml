@@ -1,8 +1,10 @@
 appengines:
     - name: engine
-      location_id: ${var.project_id}
+      project: ${var.project_id}
+      location_id: BR
     - name: appengine
-      location_id: ${var.project_id}
+      project: ${var.project_id}
+      location_id: BR
 bigquery:
     - name: dataset.bq
       schema: |-
@@ -29,7 +31,7 @@ dataflows:
 functions:
     - name: func
       source: .
-      runtime: go116
+      runtime: go1.x
       source_archive_bucket: ${google_storage_bucket.archive_funcs_bucket.name}
       source_archive_object: ${google_storage_bucket_object.func_archive_funcs_object.name}
       trigger_http: "true"

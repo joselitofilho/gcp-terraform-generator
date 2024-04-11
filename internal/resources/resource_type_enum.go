@@ -15,20 +15,20 @@ const (
 	// BigTable represents the Cloud Big Table resource type.
 	BigTable ResourceType = "bigtable"
 
-	// Function represents the Cloud Function resource type.
-	Function ResourceType = "function"
-
-	// Storage represents the Cloud Storage resource type.
-	Storage ResourceType = "storage"
-
 	// Dataflow represents the Dataflow resource type.
 	Dataflow ResourceType = "dataflow"
+
+	// Function represents the Cloud Function resource type.
+	Function ResourceType = "function"
 
 	// IoTCore represents the IoT Core resource type.
 	IoTCore ResourceType = "iotcore"
 
 	// PubSub represents the Pub Sub resource type.
 	PubSub ResourceType = "pubsub"
+
+	// Storage represents the Cloud Storage resource type.
+	Storage ResourceType = "storage"
 
 	// UnknownType represents an unknown resource type.
 	UnknownType ResourceType = "unknown"
@@ -46,16 +46,16 @@ func (rt ResourceType) String() string {
 		return "BigQuery"
 	case BigTable:
 		return "BigTable"
-	case Function:
-		return "Function"
-	case Storage:
-		return "Storage"
 	case Dataflow:
 		return "Dataflow"
+	case Function:
+		return "Function"
 	case IoTCore:
 		return "IoTCore"
 	case PubSub:
 		return "PubSub"
+	case Storage:
+		return "Storage"
 	default:
 		return "Unknown"
 	}
@@ -70,16 +70,16 @@ func ParseResourceType(s string) ResourceType {
 		return BigQuery
 	case "bigtable":
 		return BigTable
-	case "function":
-		return Function
-	case "storage":
-		return Storage
 	case "dataflow":
 		return Dataflow
+	case "function":
+		return Function
 	case "iotcore":
 		return IoTCore
 	case "pubsub":
 		return PubSub
+	case "storage":
+		return Storage
 	default:
 		return UnknownType
 	}

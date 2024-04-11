@@ -7,7 +7,10 @@ import (
 	gcpresources "github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 )
 
-const defaultProjectID = "${var.project_id}"
+const (
+	defaultProjectID  = "${var.project_id}"
+	defaultLocationID = "US"
+)
 
 func (t *Transformer) buildAppEngineRelationship(source, appEngine resources.Resource) {
 	if gcpresources.ParseResourceType(source.ResourceType()) == gcpresources.PubSub {
@@ -16,8 +19,17 @@ func (t *Transformer) buildAppEngineRelationship(source, appEngine resources.Res
 }
 
 func (t *Transformer) buildAppEngines() (result []*config.AppEngine) {
-	for _, bq := range t.resourcesByTypeMap[gcpresources.AppEngine] {
-		result = append(result, &config.AppEngine{Name: bq.Value(), LocationID: defaultProjectID})
+	var locationID string
+	if t.yamlConfig.Diagram != nil {
+		locationID = t.yamlConfig.Diagram.DefaultLocation
+	}
+
+	if locationID == "" {
+		locationID = defaultLocation
+	}
+
+	for _, ae := range t.resourcesByTypeMap[gcpresources.AppEngine] {
+		result = append(result, &config.AppEngine{Name: ae.Value(), Project: defaultProjectID, LocationID: locationID})
 	}
 
 	return result
