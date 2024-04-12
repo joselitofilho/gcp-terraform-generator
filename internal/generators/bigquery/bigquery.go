@@ -33,12 +33,15 @@ func (ps *BigQuery) Build() error {
 	modPath := path.Join(ps.output, "mod")
 	_ = os.MkdirAll(modPath, os.ModePerm)
 
-	result := make([]string, 0, len(yamlConfig.BigQueryTables))
+	resultBigQuery := make([]string, 0, len(yamlConfig.BigQueryTables))
+	resultDataset := make([]string, 0, len(yamlConfig.BigQueryTables))
 
 	templates := utils.MergeStringMap(defaultTfTemplateFiles,
 		generators.CreateTemplatesMap(yamlConfig.OverrideDefaultTemplates.BigQuery))
 
 	tg := generators.NewGenerator()
+
+	datasetMap := map[string]struct{}{}
 
 	for _, conf := range yamlConfig.BigQueryTables {
 		nameParts := strings.Split(conf.Name, ".")
@@ -50,7 +53,7 @@ func (ps *BigQuery) Build() error {
 
 		table := nameParts[len(nameParts)-1]
 
-		data := Data{
+		dataBigQuery := Data{
 			Dataset: dataset,
 			Table:   table,
 			Schema:  conf.Schema,
@@ -59,27 +62,44 @@ func (ps *BigQuery) Build() error {
 		if len(conf.Files) > 0 {
 			filesConf := generators.CreateFilesMap(conf.Files)
 
-			generators.MustGenerateFiles(tg, nil, filesConf, data, modPath)
+			generators.MustGenerateFiles(tg, nil, filesConf, dataBigQuery, modPath)
 
 			fmtcolor.White.Printf("Big Query '%s' has been generated successfully\n", conf.Name)
 
 			continue
 		}
 
-		output, err := tg.Build(data, "bigquery-tf-template", templates[filenameBigQuerytf])
+		outputBigQuery, err := tg.Build(dataBigQuery, "bigquery-tf-template", templates[filenameBigQuerytf])
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
 
-		result = append(result, output)
+		resultBigQuery = append(resultBigQuery, outputBigQuery)
+
+		if _, ok := datasetMap[dataset]; !ok {
+			datasetMap[dataset] = struct{}{}
+
+			outputDataset, err := tg.Build(Data{Dataset: dataset}, "dataset-tf-template", templates[filenameDatasettf])
+			if err != nil {
+				return fmt.Errorf("%w", err)
+			}
+
+			resultDataset = append(resultDataset, outputDataset)
+		}
 	}
 
-	if len(result) > 0 {
-		outputFile := path.Join(modPath, filenameBigQuerytf)
+	if len(resultBigQuery) > 0 {
+		bigQueryOutputFile := path.Join(modPath, filenameBigQuerytf)
 
-		generators.MustGenerateFile(tg, nil, filenameBigQuerytf, strings.Join(result, "\n"), outputFile, Data{})
+		generators.MustGenerateFile(tg, nil, filenameBigQuerytf, strings.Join(resultBigQuery, "\n"), bigQueryOutputFile, Data{})
 
 		fmtcolor.White.Println("Big Query has been generated successfully")
+
+		datasetOutputFile := path.Join(modPath, filenameDatasettf)
+
+		generators.MustGenerateFile(tg, nil, filenameDatasettf, strings.Join(resultDataset, "\n"), datasetOutputFile, Data{})
+
+		fmtcolor.White.Println("Big Query Dataset has been generated successfully")
 	}
 
 	return nil

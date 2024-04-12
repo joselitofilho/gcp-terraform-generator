@@ -33,8 +33,10 @@ Default temaplates:
 ```
 📦 bigquery
  ┣ 📂 tmpls
+ ┃ ┣ 📜 dataset.tf.tmpl
  ┗ ┗ 📜 bigquery.tf.tmpl
 ```
+- [📜 dataset.tf.tmpl](./internal/generators/bigquery/tmpls/dataset.tf.tmpl)
 - [📜 bigquery.tf.tmpl](./internal/generators/bigquery/tmpls/bigquery.tf.tmpl)
 
 ### Big Table

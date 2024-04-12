@@ -2,11 +2,20 @@ package bigquery
 
 import _ "embed"
 
-const filenameBigQuerytf = "bigquery.tf"
+const (
+	filenameDatasettf  = "dataset.tf"
+	filenameBigQuerytf = "bigquery.tf"
+)
 
-//go:embed tmpls/bigquery.tf.tmpl
-var tmplBigQuerytf []byte
+var (
+	//go:embed tmpls/bigquery.tf.tmpl
+	tmplBigQuerytf []byte
+
+	//go:embed tmpls/dataset.tf.tmpl
+	tmplDatasettf []byte
+)
 
 var defaultTfTemplateFiles = map[string]string{
 	filenameBigQuerytf: string(tmplBigQuerytf),
+	filenameDatasettf:  string(tmplDatasettf),
 }

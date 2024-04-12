@@ -1,10 +1,10 @@
 appengines:
     - name: engine
       project: ${var.project_id}
-      location_id: BR
+      location_id: US
     - name: appengine
       project: ${var.project_id}
-      location_id: BR
+      location_id: US
 bigquery:
     - name: dataset.bq
       schema: |-
