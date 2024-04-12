@@ -254,7 +254,8 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 
 	dataflowResource := resources.NewGenericResource("1", "dataflow", gcpresources.Dataflow.String())
 
-	// bqResource := resources.NewGenericResource("2", "dataset.bq", gcpresources.BigQuery.String())
+	bqResource := resources.NewGenericResource("2", "dataset.bq", gcpresources.BigQuery.String())
+	bqBackupResource := resources.NewGenericResource("3", "dataset.backup", gcpresources.BigQuery.String())
 
 	pubSubAppEngineResource := resources.NewGenericResource("2", "psengine", gcpresources.PubSub.String())
 	pubSubFuncResource := resources.NewGenericResource("3", "psfunc", gcpresources.PubSub.String())
@@ -264,49 +265,106 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 		fields fields
 		want   *resources.ResourceCollection
 	}{
-		// {
-		// 	name: "from dataflow to big query",
-		// 	fields: fields{
-		// 		yamlConfig: &config.Config{},
-		// 		tfConfig: &hcl.Config{
-		// 			Resources: []*hcl.Resource{
-		// 				{
-		// 					Type:   "google_dataflow_job",
-		// 					Name:   "dataflow_df_job",
-		// 					Labels: []string{"google_dataflow_job", "dataflow_df_job"},
-		// 					Attributes: map[string]any{
-		// 						"name": "dataflow",
-		// 						"parameters": map[string]any{
-		// 							"outputTable": "${var.project_id}:${google_bigquery_table.dataset_bq_table.dataset_id}.${google_bigquery_table.dataset_bq_table.table_id}",
-		// 						},
-		// 					},
-		// 				},
-		// 				{
-		// 					Type:   "google_bigquery_dataset",
-		// 					Name:   "dataset_dataset",
-		// 					Labels: []string{"google_bigquery_dataset", "dataset_dataset"},
-		// 					Attributes: map[string]any{
-		// 						"dataset_id": "dataset",
-		// 					},
-		// 				},
-		// 				{
-		// 					Type:   "google_bigquery_table",
-		// 					Name:   "dataset_bq_table",
-		// 					Labels: []string{"google_bigquery_table", "dataset_bq_table"},
-		// 					Attributes: map[string]any{
-		// 						"dataset_id": "google_bigquery_dataset.dataset_dataset.dataset_id",
-		// 						"table_id":   "bq",
-		// 						"schema":     bqTableSchema,
-		// 					},
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// 	want: &resources.ResourceCollection{
-		// 		Resources:     []resources.Resource{dataflowResource, bqResource},
-		// 		Relationships: []resources.Relationship{{Source: dataflowResource, Target: bqResource}},
-		// 	},
-		// },
+		{
+			name: "from dataflow to big query table",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						{
+							Type:   "google_dataflow_job",
+							Name:   "dataflow_df_job",
+							Labels: []string{"google_dataflow_job", "dataflow_df_job"},
+							Attributes: map[string]any{
+								"name": "dataflow",
+								"parameters": map[string]any{
+									"outputTable": "${var.project_id}:${google_bigquery_table.dataset_bq_table.dataset_id}.${google_bigquery_table.dataset_bq_table.table_id}",
+								},
+							},
+						},
+						{
+							Type:   "google_bigquery_dataset",
+							Name:   "dataset_dataset",
+							Labels: []string{"google_bigquery_dataset", "dataset_dataset"},
+							Attributes: map[string]any{
+								"dataset_id": "dataset",
+							},
+						},
+						{
+							Type:   "google_bigquery_table",
+							Name:   "dataset_bq_table",
+							Labels: []string{"google_bigquery_table", "dataset_bq_table"},
+							Attributes: map[string]any{
+								"dataset_id": "google_bigquery_dataset.dataset_dataset.dataset_id",
+								"table_id":   "bq",
+								"schema":     bqTableSchema,
+							},
+						},
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources:     []resources.Resource{dataflowResource, bqResource},
+				Relationships: []resources.Relationship{{Source: dataflowResource, Target: bqResource}},
+			},
+		},
+		{
+			name: "from dataflow to multiple big query tables",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						{
+							Type:   "google_dataflow_job",
+							Name:   "dataflow_df_job",
+							Labels: []string{"google_dataflow_job", "dataflow_df_job"},
+							Attributes: map[string]any{
+								"name": "dataflow",
+								"parameters": map[string]any{
+									"outputTable1": "${var.project_id}:${google_bigquery_table.dataset_bq_table.dataset_id}.${google_bigquery_table.dataset_bq_table.table_id}",
+									"outputTable2": "${var.project_id}:dataset.backup",
+								},
+							},
+						},
+						{
+							Type:   "google_bigquery_dataset",
+							Name:   "dataset_dataset",
+							Labels: []string{"google_bigquery_dataset", "dataset_dataset"},
+							Attributes: map[string]any{
+								"dataset_id": "dataset",
+							},
+						},
+						{
+							Type:   "google_bigquery_table",
+							Name:   "dataset_bq_table",
+							Labels: []string{"google_bigquery_table", "dataset_bq_table"},
+							Attributes: map[string]any{
+								"dataset_id": "google_bigquery_dataset.dataset_dataset.dataset_id",
+								"table_id":   "bq",
+								"schema":     bqTableSchema,
+							},
+						},
+						{
+							Type:   "google_bigquery_table",
+							Name:   "dataset_backup_table",
+							Labels: []string{"google_bigquery_table", "dataset_backup_table"},
+							Attributes: map[string]any{
+								"dataset_id": "google_bigquery_dataset.dataset_dataset.dataset_id",
+								"table_id":   "backup",
+								"schema":     "{}",
+							},
+						},
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources: []resources.Resource{dataflowResource, bqResource, bqBackupResource},
+				Relationships: []resources.Relationship{
+					{Source: dataflowResource, Target: bqResource},
+					{Source: dataflowResource, Target: bqBackupResource},
+				},
+			},
+		},
 		{
 			name: "from dataflow to pub sub",
 			fields: fields{
@@ -319,7 +377,7 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 							Labels: []string{"google_dataflow_job", "dataflow_df_job"},
 							Attributes: map[string]any{
 								"name": "dataflow",
-								"parameters": map[string]string{
+								"parameters": map[string]any{
 									"outputTopic": "google_pubsub_subscription.psengine_subscription.name",
 								},
 							},
@@ -425,7 +483,7 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 
 			got := tr.Transform()
 
-			require.Equal(t, tc.want, got)
+			require.True(t, tc.want.Equal(got))
 		})
 	}
 }

@@ -32,8 +32,13 @@ type Transformer struct {
 	resources     []resources.Resource
 	relationships []resources.Relationship
 
+	// ByName
+	bqTableByName map[string]resources.Resource
+
+	// GSCByName
 	pbSubscriptionGCSByName map[string]*gcpresources.ResourceGCS
 
+	// ByLabel
 	appEngineByLabel map[string]resources.Resource
 	bqTableByLabel   map[string]resources.Resource
 	bigTableByLabel  map[string]resources.Resource
@@ -43,8 +48,10 @@ type Transformer struct {
 	pubSubByLabel    map[string]resources.Resource
 	storageByLabel   map[string]resources.Resource
 
+	// GCSByLabel
 	bqDatasetGCSByLabel map[string]*gcpresources.ResourceGCS
 
+	// Reletionship
 	pubSubByPubSubSubscriptionLabel map[string]*gcpresources.ResourceGCS
 
 	relationshipsMap map[*gcpresources.ResourceGCS][]*gcpresources.ResourceGCS
@@ -59,6 +66,8 @@ func NewTransformer(yamlConfig *config.Config, tfConfig *hcl.Config) *Transforme
 
 		resources:     []resources.Resource{},
 		relationships: []resources.Relationship{},
+
+		bqTableByName: map[string]resources.Resource{},
 
 		pbSubscriptionGCSByName: map[string]*gcpresources.ResourceGCS{},
 
@@ -146,6 +155,7 @@ func (t *Transformer) getResourceByGCSName(gcs *gcpresources.ResourceGCS) (resou
 	switch gcs.Type {
 	case gcpresources.LabelAppEngine:
 	case gcpresources.LabelBigQueryTable:
+		resource = t.bqTableByName[gcs.Name]
 	case gcpresources.LabelBigTable:
 	case gcpresources.LabelDataFlow:
 	case gcpresources.LabelFunction:
@@ -316,6 +326,7 @@ func (t *Transformer) processBigQueryTable(conf *hcl.Resource) {
 		target = resources.NewGenericResource(target.ID(), value, target.ResourceType())
 
 		t.resources[len(t.resources)-1] = target
+		t.bqTableByName[value] = target
 		t.bqTableByLabel[label] = target
 	}
 }
@@ -340,10 +351,44 @@ func (t *Transformer) processDataFlow(conf *hcl.Resource) {
 
 	if parameters, ok := parameters.(map[string]any); ok {
 		for targetAttr, v := range parameters {
-			if strings.HasPrefix(targetAttr, "outputTopic") {
-				targetValue := replaceVars(v.(string), t.tfConfig.Variables, t.tfConfig.Locals,
+			value, ok := v.(string)
+			if !ok {
+				continue
+			}
+
+			var labels []string
+
+			hasRelationship := true
+			switch {
+			case strings.HasPrefix(targetAttr, "outputTopic"):
+				labels = []string{gcpresources.LabelPubSubSubscription}
+			case strings.HasPrefix(targetAttr, "outputTable"):
+				overrideValue := false
+
+				parts := strings.Split(value, ":")
+				if len(parts) > 1 {
+					parts = strings.Split(parts[1], ".")
+					for i := range parts {
+						if strings.Contains(parts[i], gcpresources.LabelBigQueryTable) {
+							value = fmt.Sprintf("%s.%s", strings.ReplaceAll(parts[i], "${", ""), parts[i+1])
+							overrideValue = true
+							break
+						}
+					}
+
+					if !overrideValue {
+						value = strings.Join(parts, ".")
+						labels = []string{gcpresources.LabelBigQueryTable}
+					}
+				}
+			default:
+				hasRelationship = false
+			}
+
+			if hasRelationship {
+				targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
 					t.yamlConfig.Draw.ReplaceableTexts)
-				targetGCS := gcpresources.ParseResourceGCS(targetValue, []string{gcpresources.LabelPubSubSubscription})
+				targetGCS := gcpresources.ParseResourceGCS(targetValue, labels)
 
 				t.relationshipsMap[sourceGCS] = append(t.relationshipsMap[sourceGCS], targetGCS)
 			}
