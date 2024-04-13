@@ -8,18 +8,6 @@ type ResourceGCS struct {
 	Label string
 }
 
-var labelByResourceType = map[ResourceType]string{
-	AppEngine:   LabelAppEngine,
-	BigQuery:    LabelBigQueryTable,
-	BigTable:    LabelBigTable,
-	Dataflow:    LabelDataFlow,
-	Function:    LabelFunction,
-	IoTCore:     LabelIoTCore,
-	PubSub:      LabelPubSub,
-	Storage:     LabelStorage,
-	UnknownType: "",
-}
-
 func ParseResourceGCS(gcs string, labels []string) *ResourceGCS {
 	var gcsType, name, label string
 
@@ -31,16 +19,11 @@ func ParseResourceGCS(gcs string, labels []string) *ResourceGCS {
 		gcsType, name, label = parseGCSGeneric(gcs)
 	}
 
-	// if suggestedResType == UnknownType {
-	// 	suggestedResType = inferResourceType(gcsType)
-	// }
-
 	if label == "" && len(labels) > 1 {
 		label = labels[1]
 	}
 
 	if gcsType == "" && len(labels) > 0 {
-		// gcsType = labelByResourceType[suggestedResType]
 		gcsType = labels[0]
 	}
 
@@ -79,27 +62,4 @@ func parseGCSGeneric(gcs string) (gcsType, name, label string) {
 	}
 
 	return gcsType, name, label
-}
-
-func inferResourceType(gcsType string) ResourceType {
-	switch gcsType {
-	case LabelAppEngine:
-		return AppEngine
-	case LabelBigQueryTable:
-		return BigQuery
-	case LabelBigTable:
-		return BigTable
-	case LabelDataFlow:
-		return Dataflow
-	case LabelFunction:
-		return Function
-	case LabelIoTCore:
-		return IoTCore
-	case LabelPubSub:
-		return PubSub
-	case LabelStorage:
-		return Storage
-	default:
-		return UnknownType
-	}
 }

@@ -281,7 +281,9 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 							Attributes: map[string]any{
 								"name": "dataflow",
 								"parameters": map[string]any{
-									"outputTable": "${var.project_id}:${google_bigquery_table.dataset_bq_table.dataset_id}.${google_bigquery_table.dataset_bq_table.table_id}",
+									"outputTable": "${var.project_id}:" +
+										"${google_bigquery_table.dataset_bq_table.dataset_id}." +
+										"${google_bigquery_table.dataset_bq_table.table_id}",
 								},
 							},
 						},
@@ -324,7 +326,9 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 							Attributes: map[string]any{
 								"name": "dataflow",
 								"parameters": map[string]any{
-									"outputTable1": "${var.project_id}:${google_bigquery_table.dataset_bq_table.dataset_id}.${google_bigquery_table.dataset_bq_table.table_id}",
+									"outputTable1": "${var.project_id}:" +
+										"${google_bigquery_table.dataset_bq_table.dataset_id}." +
+										"${google_bigquery_table.dataset_bq_table.table_id}",
 									"outputTable2": "${var.project_id}:dataset.backup",
 								},
 							},

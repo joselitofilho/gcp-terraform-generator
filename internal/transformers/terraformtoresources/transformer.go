@@ -32,7 +32,7 @@ type Transformer struct {
 	resources     []resources.Resource
 	relationships []resources.Relationship
 
-	// ByName
+	// ByName.
 	appEngineByName map[string]resources.Resource
 	bqTableByName   map[string]resources.Resource
 	bigTableByName  map[string]resources.Resource
@@ -42,10 +42,10 @@ type Transformer struct {
 	pubSubByName    map[string]resources.Resource
 	storageByName   map[string]resources.Resource
 
-	// GSCByName
+	// GSCByName.
 	pbSubscriptionGCSByName map[string]*gcpresources.ResourceGCS
 
-	// ByLabel
+	// ByLabel.
 	appEngineByLabel map[string]resources.Resource
 	bqTableByLabel   map[string]resources.Resource
 	bigTableByLabel  map[string]resources.Resource
@@ -55,10 +55,10 @@ type Transformer struct {
 	pubSubByLabel    map[string]resources.Resource
 	storageByLabel   map[string]resources.Resource
 
-	// GCSByLabel
+	// GCSByLabel.
 	bqDatasetGCSByLabel map[string]*gcpresources.ResourceGCS
 
-	// Reletionship
+	// Reletionship.
 	pubSubByPubSubSubscriptionLabel map[string]*gcpresources.ResourceGCS
 
 	relationshipsMap map[*gcpresources.ResourceGCS][]*gcpresources.ResourceGCS
@@ -315,7 +315,8 @@ func (t *Transformer) processResource(
 }
 
 func (t *Transformer) processAppEngine(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.AppEngine, EmptyAttributeName, suffixAppEngine, t.appEngineByName, t.appEngineByLabel)
+	t.processResource(conf,
+		gcpresources.AppEngine, EmptyAttributeName, suffixAppEngine, t.appEngineByName, t.appEngineByLabel)
 }
 
 func (t *Transformer) processBigQueryDataset(conf *hcl.Resource) {
@@ -374,39 +375,45 @@ func (t *Transformer) processDataFlow(conf *hcl.Resource) {
 	}
 
 	if parameters, ok := parameters.(map[string]any); ok {
-		for targetAttr, v := range parameters {
-			value, ok := v.(string)
-			if !ok {
-				continue
+		t.processDataFlowParameters(parameters, sourceGCS)
+	}
+}
+
+func (t *Transformer) processDataFlowParameters(parameters map[string]any, sourceGCS *gcpresources.ResourceGCS) {
+	for targetAttr, v := range parameters {
+		value, ok := v.(string)
+		if !ok {
+			continue
+		}
+
+		value = extractTextFromTFVar(value)
+
+		var suggestionLabels []string
+
+		hasRelationship := true
+
+		switch {
+		case strings.HasPrefix(targetAttr, "outputTopic"):
+			suggestionLabels = []string{gcpresources.LabelPubSubSubscription}
+		case strings.HasPrefix(targetAttr, "outputTable"):
+			parts := strings.Split(value, ":")
+			if len(parts) > 1 {
+				value = parts[1]
 			}
 
-			value = extractTextFromTFVar(value)
+			suggestionLabels = []string{gcpresources.LabelBigQueryTable}
+		case strings.HasPrefix(targetAttr, "outputDirectory"):
+			suggestionLabels = []string{gcpresources.LabelStorage}
+		default:
+			hasRelationship = false
+		}
 
-			var suggestionLabels []string
+		if hasRelationship {
+			targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
+				t.yamlConfig.Draw.ReplaceableTexts)
+			targetGCS := gcpresources.ParseResourceGCS(targetValue, suggestionLabels)
 
-			hasRelationship := true
-			switch {
-			case strings.HasPrefix(targetAttr, "outputTopic"):
-				suggestionLabels = []string{gcpresources.LabelPubSubSubscription}
-			case strings.HasPrefix(targetAttr, "outputTable"):
-				parts := strings.Split(value, ":")
-				if len(parts) > 1 {
-					value = parts[1]
-				}
-				suggestionLabels = []string{gcpresources.LabelBigQueryTable}
-			case strings.HasPrefix(targetAttr, "outputDirectory"):
-				suggestionLabels = []string{gcpresources.LabelStorage}
-			default:
-				hasRelationship = false
-			}
-
-			if hasRelationship {
-				targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
-					t.yamlConfig.Draw.ReplaceableTexts)
-				targetGCS := gcpresources.ParseResourceGCS(targetValue, suggestionLabels)
-
-				t.relationshipsMap[sourceGCS] = append(t.relationshipsMap[sourceGCS], targetGCS)
-			}
+			t.relationshipsMap[sourceGCS] = append(t.relationshipsMap[sourceGCS], targetGCS)
 		}
 	}
 }

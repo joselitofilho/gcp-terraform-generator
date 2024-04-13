@@ -91,13 +91,15 @@ func (ps *BigQuery) Build() error {
 	if len(resultBigQuery) > 0 {
 		bigQueryOutputFile := path.Join(modPath, filenameBigQuerytf)
 
-		generators.MustGenerateFile(tg, nil, filenameBigQuerytf, strings.Join(resultBigQuery, "\n"), bigQueryOutputFile, Data{})
+		generators.MustGenerateFile(
+			tg, nil, filenameBigQuerytf, strings.Join(resultBigQuery, "\n"), bigQueryOutputFile, Data{})
 
 		fmtcolor.White.Println("Big Query has been generated successfully")
 
 		datasetOutputFile := path.Join(modPath, filenameDatasettf)
 
-		generators.MustGenerateFile(tg, nil, filenameDatasettf, strings.Join(resultDataset, "\n"), datasetOutputFile, Data{})
+		generators.MustGenerateFile(
+			tg, nil, filenameDatasettf, strings.Join(resultDataset, "\n"), datasetOutputFile, Data{})
 
 		fmtcolor.White.Println("Big Query Dataset has been generated successfully")
 	}
