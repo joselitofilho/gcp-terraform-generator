@@ -1,5 +1,5 @@
 resource "google_bigtable_instance" "{{ToSnake $.Name}}_instance" {
-  name          = "{{$.Name}}-instance"
+  name          = "{{$.Name}}"
   display_name  = "{{$.Name}} Instance"
   
   cluster {
