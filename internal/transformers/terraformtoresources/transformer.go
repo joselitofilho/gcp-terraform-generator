@@ -24,7 +24,8 @@ const (
 	suffixPubSub        = "topic"
 	suffixStorage       = "bucket"
 
-	attributeName = "name"
+	attributeName  = "name"
+	attributeTopic = "topic"
 )
 
 type FNProcess func(key string) (hasRelationship bool, suggestionLabels []string)
@@ -502,18 +503,18 @@ func (t *Transformer) processPubSub(conf *hcl.Resource) {
 func (t *Transformer) processPubSubSubscription(conf *hcl.Resource) {
 	label := conf.Labels[1]
 
-	name := replaceVars(conf.Attributes["name"].(string), t.tfConfig.Variables, t.tfConfig.Locals,
+	name := replaceVars(conf.Attributes[attributeName].(string), t.tfConfig.Variables, t.tfConfig.Locals,
 		t.yamlConfig.Draw.ReplaceableTexts)
 	subsGCS := gcpresources.ParseResourceGCS(name, conf.Labels)
 
-	topic := replaceVars(conf.Attributes["topic"].(string), t.tfConfig.Variables, t.tfConfig.Locals,
+	topic := replaceVars(conf.Attributes[attributeTopic].(string), t.tfConfig.Variables, t.tfConfig.Locals,
 		t.yamlConfig.Draw.ReplaceableTexts)
 	topicGCS := gcpresources.ParseResourceGCS(topic, conf.Labels)
 
 	t.pbSubscriptionGCSByName[name] = subsGCS
 	t.pubSubByPubSubSubscriptionLabel[label] = topicGCS
 
-	t.processRelationshipByAttrsMap(conf, attributeName, "push_config", t.processPubSubSubsPushConfig)
+	t.processRelationshipByAttrsMap(conf, attributeTopic, "push_config", t.processPubSubSubsPushConfig)
 }
 
 func (t *Transformer) processPubSubSubsPushConfig(key string) (hasRelationship bool, suggestionLabels []string) {
