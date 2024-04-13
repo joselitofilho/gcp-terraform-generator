@@ -24,10 +24,11 @@ func ParseResourceGCS(gcs string, labels []string) *ResourceGCS {
 	var gcsType, name, label string
 
 	switch {
-	case strings.HasPrefix(gcs, "gs:"):
+	case strings.HasPrefix(gcs, "gs://"):
+		gcsType, name, label = parseGCSByGS(gcs)
 	case strings.HasPrefix(gcs, "http"):
 	default:
-		gcsType, name, label = parseGCSTypeAndName(gcs)
+		gcsType, name, label = parseGCSGeneric(gcs)
 	}
 
 	// if suggestedResType == UnknownType {
@@ -46,17 +47,38 @@ func ParseResourceGCS(gcs string, labels []string) *ResourceGCS {
 	return &ResourceGCS{Type: gcsType, Name: name, Label: label}
 }
 
-func parseGCSTypeAndName(gcs string) (arnType, name, label string) {
+func parseGCSByGS(gcs string) (gcsType, name, label string) {
+	parts := strings.Split(gcs, "gs://")
+
+	if len(parts) > 1 {
+		parts = strings.Split(parts[1], "/")
+
+		if len(parts) > 0 {
+			parts = strings.Split(parts[0], ".")
+
+			if strings.HasPrefix(parts[0], "google_") {
+				gcsType = parts[0]
+				label = parts[1]
+			} else {
+				name = parts[0]
+			}
+		}
+	}
+
+	return
+}
+
+func parseGCSGeneric(gcs string) (gcsType, name, label string) {
 	parts := strings.Split(gcs, ".")
 
 	if len(parts) > 1 && strings.HasPrefix(parts[0], "google_") {
-		arnType = parts[0]
+		gcsType = parts[0]
 		label = parts[1]
 	} else {
 		name = gcs
 	}
 
-	return arnType, name, label
+	return gcsType, name, label
 }
 
 func inferResourceType(gcsType string) ResourceType {

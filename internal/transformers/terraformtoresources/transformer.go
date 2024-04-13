@@ -33,7 +33,14 @@ type Transformer struct {
 	relationships []resources.Relationship
 
 	// ByName
-	bqTableByName map[string]resources.Resource
+	appEngineByName map[string]resources.Resource
+	bqTableByName   map[string]resources.Resource
+	bigTableByName  map[string]resources.Resource
+	dataFlowByName  map[string]resources.Resource
+	functionByName  map[string]resources.Resource
+	iotCoreByName   map[string]resources.Resource
+	pubSubByName    map[string]resources.Resource
+	storageByName   map[string]resources.Resource
 
 	// GSCByName
 	pbSubscriptionGCSByName map[string]*gcpresources.ResourceGCS
@@ -67,7 +74,14 @@ func NewTransformer(yamlConfig *config.Config, tfConfig *hcl.Config) *Transforme
 		resources:     []resources.Resource{},
 		relationships: []resources.Relationship{},
 
-		bqTableByName: map[string]resources.Resource{},
+		appEngineByName: map[string]resources.Resource{},
+		bqTableByName:   map[string]resources.Resource{},
+		bigTableByName:  map[string]resources.Resource{},
+		dataFlowByName:  map[string]resources.Resource{},
+		functionByName:  map[string]resources.Resource{},
+		iotCoreByName:   map[string]resources.Resource{},
+		pubSubByName:    map[string]resources.Resource{},
+		storageByName:   map[string]resources.Resource{},
 
 		pbSubscriptionGCSByName: map[string]*gcpresources.ResourceGCS{},
 
@@ -157,14 +171,20 @@ func (t *Transformer) getResourceByGCSName(gcs *gcpresources.ResourceGCS) (resou
 	case gcpresources.LabelBigQueryTable:
 		resource = t.bqTableByName[gcs.Name]
 	case gcpresources.LabelBigTable:
+		resource = t.bigTableByName[gcs.Name]
 	case gcpresources.LabelDataFlow:
+		resource = t.dataFlowByName[gcs.Name]
 	case gcpresources.LabelFunction:
+		resource = t.functionByName[gcs.Name]
 	case gcpresources.LabelIoTCore:
+		resource = t.iotCoreByName[gcs.Name]
 	case gcpresources.LabelPubSub:
+		resource = t.pubSubByName[gcs.Name]
 	case gcpresources.LabelPubSubSubscription:
 		pbSubLabel := t.pbSubscriptionGCSByName[gcs.Name].Label
 		resource = t.pubSubByLabel[t.pubSubByPubSubSubscriptionLabel[pbSubLabel].Label]
 	case gcpresources.LabelStorage:
+		resource = t.storageByName[gcs.Name]
 	}
 
 	return resource
@@ -274,7 +294,7 @@ func (t *Transformer) processTerraformResources() {
 
 func (t *Transformer) processResource(
 	conf *hcl.Resource, resourceType gcpresources.ResourceType, attributeName, labelSuffix string,
-	resourcesByLabel map[string]resources.Resource,
+	resourcesByName, resourcesByLabel map[string]resources.Resource,
 ) {
 	label := conf.Labels[1]
 	name := getResourceNameFromLabel(label, "_"+labelSuffix)
@@ -289,12 +309,13 @@ func (t *Transformer) processResource(
 		t.id++
 
 		t.resources = append(t.resources, resource)
+		resourcesByName[name] = resource
 		resourcesByLabel[label] = resource
 	}
 }
 
 func (t *Transformer) processAppEngine(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.AppEngine, EmptyAttributeName, suffixAppEngine, t.appEngineByLabel)
+	t.processResource(conf, gcpresources.AppEngine, EmptyAttributeName, suffixAppEngine, t.appEngineByName, t.appEngineByLabel)
 }
 
 func (t *Transformer) processBigQueryDataset(conf *hcl.Resource) {
@@ -307,7 +328,7 @@ func (t *Transformer) processBigQueryDataset(conf *hcl.Resource) {
 }
 
 func (t *Transformer) processBigQueryTable(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.BigQuery, "table_id", suffixBigQueryTable, t.bqTableByLabel)
+	t.processResource(conf, gcpresources.BigQuery, "table_id", suffixBigQueryTable, t.bqTableByName, t.bqTableByLabel)
 
 	datasetID, ok := conf.Attributes["dataset_id"]
 	if !ok {
@@ -322,23 +343,26 @@ func (t *Transformer) processBigQueryTable(conf *hcl.Resource) {
 	bqDatasetGCS := gcpresources.ParseResourceGCS(bqDatasetValue, conf.Labels)
 
 	if gcpresources.ParseResourceType(target.ResourceType()) == gcpresources.BigQuery {
-		value := t.bqDatasetGCSByLabel[bqDatasetGCS.Label].Name + "." + target.Value()
-		target = resources.NewGenericResource(target.ID(), value, target.ResourceType())
+		oldName := target.Value()
+		newName := t.bqDatasetGCSByLabel[bqDatasetGCS.Label].Name + "." + oldName
+		target = resources.NewGenericResource(target.ID(), newName, target.ResourceType())
 
 		t.resources[len(t.resources)-1] = target
-		t.bqTableByName[value] = target
 		t.bqTableByLabel[label] = target
+
+		delete(t.bqTableByName, oldName)
+		t.bqTableByName[newName] = target
 	}
 }
 
 func (t *Transformer) processBigTable(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.BigTable, "name", suffixBigTable, t.bigTableByLabel)
+	t.processResource(conf, gcpresources.BigTable, "name", suffixBigTable, t.bigTableByName, t.bigTableByLabel)
 }
 
 func (t *Transformer) processDataFlow(conf *hcl.Resource) {
 	sourceAttribute := "name"
 
-	t.processResource(conf, gcpresources.Dataflow, sourceAttribute, suffixDataFlow, t.dataFlowByLabel)
+	t.processResource(conf, gcpresources.Dataflow, sourceAttribute, suffixDataFlow, t.dataFlowByName, t.dataFlowByLabel)
 
 	sourceValue := replaceVars(conf.Attributes[sourceAttribute].(string), t.tfConfig.Variables, t.tfConfig.Locals,
 		t.yamlConfig.Draw.ReplaceableTexts)
@@ -356,31 +380,22 @@ func (t *Transformer) processDataFlow(conf *hcl.Resource) {
 				continue
 			}
 
-			var labels []string
+			value = extractTextFromTFVar(value)
+
+			var suggestionLabels []string
 
 			hasRelationship := true
 			switch {
 			case strings.HasPrefix(targetAttr, "outputTopic"):
-				labels = []string{gcpresources.LabelPubSubSubscription}
+				suggestionLabels = []string{gcpresources.LabelPubSubSubscription}
 			case strings.HasPrefix(targetAttr, "outputTable"):
-				overrideValue := false
-
 				parts := strings.Split(value, ":")
 				if len(parts) > 1 {
-					parts = strings.Split(parts[1], ".")
-					for i := range parts {
-						if strings.Contains(parts[i], gcpresources.LabelBigQueryTable) {
-							value = fmt.Sprintf("%s.%s", strings.ReplaceAll(parts[i], "${", ""), parts[i+1])
-							overrideValue = true
-							break
-						}
-					}
-
-					if !overrideValue {
-						value = strings.Join(parts, ".")
-						labels = []string{gcpresources.LabelBigQueryTable}
-					}
+					value = parts[1]
 				}
+				suggestionLabels = []string{gcpresources.LabelBigQueryTable}
+			case strings.HasPrefix(targetAttr, "outputDirectory"):
+				suggestionLabels = []string{gcpresources.LabelStorage}
 			default:
 				hasRelationship = false
 			}
@@ -388,7 +403,7 @@ func (t *Transformer) processDataFlow(conf *hcl.Resource) {
 			if hasRelationship {
 				targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
 					t.yamlConfig.Draw.ReplaceableTexts)
-				targetGCS := gcpresources.ParseResourceGCS(targetValue, labels)
+				targetGCS := gcpresources.ParseResourceGCS(targetValue, suggestionLabels)
 
 				t.relationshipsMap[sourceGCS] = append(t.relationshipsMap[sourceGCS], targetGCS)
 			}
@@ -397,15 +412,15 @@ func (t *Transformer) processDataFlow(conf *hcl.Resource) {
 }
 
 func (t *Transformer) processFunction(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.Function, "name", suffixFunction, t.functionByLabel)
+	t.processResource(conf, gcpresources.Function, "name", suffixFunction, t.functionByName, t.functionByLabel)
 }
 
 func (t *Transformer) processIoTCore(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.IoTCore, "name", suffixIoTCore, t.iotCoreByLabel)
+	t.processResource(conf, gcpresources.IoTCore, "name", suffixIoTCore, t.iotCoreByName, t.iotCoreByLabel)
 }
 
 func (t *Transformer) processPubSub(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.PubSub, "name", suffixPubSub, t.pubSubByLabel)
+	t.processResource(conf, gcpresources.PubSub, "name", suffixPubSub, t.pubSubByName, t.pubSubByLabel)
 }
 
 func (t *Transformer) processPubSubSubscription(conf *hcl.Resource) {
@@ -424,5 +439,5 @@ func (t *Transformer) processPubSubSubscription(conf *hcl.Resource) {
 }
 
 func (t *Transformer) processStorage(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.Storage, "name", suffixStorage, t.storageByLabel)
+	t.processResource(conf, gcpresources.Storage, "name", suffixStorage, t.storageByName, t.storageByLabel)
 }

@@ -260,6 +260,9 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 	pubSubAppEngineResource := resources.NewGenericResource("2", "psengine", gcpresources.PubSub.String())
 	pubSubFuncResource := resources.NewGenericResource("3", "psfunc", gcpresources.PubSub.String())
 
+	storageBucketResource := resources.NewGenericResource("2", "storage", gcpresources.Storage.String())
+	backupBucketResource := resources.NewGenericResource("3", "backup", gcpresources.Storage.String())
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -467,6 +470,87 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 				Relationships: []resources.Relationship{
 					{Source: dataflowResource, Target: pubSubAppEngineResource},
 					{Source: dataflowResource, Target: pubSubFuncResource},
+				},
+			},
+		},
+		{
+			name: "from dataflow to storage",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						{
+							Type:   "google_dataflow_job",
+							Name:   "dataflow_df_job",
+							Labels: []string{"google_dataflow_job", "dataflow_df_job"},
+							Attributes: map[string]any{
+								"name": "dataflow",
+								"parameters": map[string]any{
+									"outputDirectory": "gs://${google_storage_bucket.storage_bucket.name}/output/",
+								},
+							},
+						},
+						{
+							Type:   "google_storage_bucket",
+							Name:   "storage_bucket",
+							Labels: []string{"google_storage_bucket", "storage_bucket"},
+							Attributes: map[string]any{
+								"name":     "storage",
+								"location": "US",
+							},
+						},
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources:     []resources.Resource{dataflowResource, storageBucketResource},
+				Relationships: []resources.Relationship{{Source: dataflowResource, Target: storageBucketResource}},
+			},
+		},
+		{
+			name: "from dataflow to storages",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						{
+							Type:   "google_dataflow_job",
+							Name:   "dataflow_df_job",
+							Labels: []string{"google_dataflow_job", "dataflow_df_job"},
+							Attributes: map[string]any{
+								"name": "dataflow",
+								"parameters": map[string]any{
+									"outputDirectory1": "gs://${google_storage_bucket.storage_bucket.name}/output/",
+									"outputDirectory2": "gs://backup/output/",
+								},
+							},
+						},
+						{
+							Type:   "google_storage_bucket",
+							Name:   "storage_bucket",
+							Labels: []string{"google_storage_bucket", "storage_bucket"},
+							Attributes: map[string]any{
+								"name":     "storage",
+								"location": "US",
+							},
+						},
+						{
+							Type:   "google_storage_bucket",
+							Name:   "backup_bucket",
+							Labels: []string{"google_storage_bucket", "backup_bucket"},
+							Attributes: map[string]any{
+								"name":     "backup",
+								"location": "US",
+							},
+						},
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources: []resources.Resource{dataflowResource, storageBucketResource, backupBucketResource},
+				Relationships: []resources.Relationship{
+					{Source: dataflowResource, Target: storageBucketResource},
+					{Source: dataflowResource, Target: backupBucketResource},
 				},
 			},
 		},

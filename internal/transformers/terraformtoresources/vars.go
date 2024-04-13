@@ -2,6 +2,7 @@ package terraformtoresources
 
 import (
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -146,4 +147,15 @@ func replaceStrings(str string, replaceableStrs map[string]string) string {
 	}
 
 	return str
+}
+
+func extractTextFromTFVar(s string) string {
+	re := regexp.MustCompile(`\${(.*?)}`)
+	matches := re.FindAllStringSubmatch(s, -1)
+
+	for _, match := range matches {
+		s = strings.Replace(s, match[0], match[1], 1)
+	}
+
+	return s
 }
