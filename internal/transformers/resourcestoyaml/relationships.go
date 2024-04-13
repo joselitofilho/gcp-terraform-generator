@@ -25,6 +25,9 @@ func (t *Transformer) buildDataFlowToStorage(dataFlow, storage resources.Resourc
 func (t *Transformer) buildFunctionToPubSub(function, pubSub resources.Resource) {
 	pubSubID := pubSub.ID()
 	t.functionPublisherByPubSubID[pubSubID] = append(t.functionPublisherByPubSubID[pubSubID], function)
+
+	functionID := function.ID()
+	t.pubSubsFromFunctionID[functionID] = append(t.pubSubsFromFunctionID[functionID], pubSub)
 }
 
 func (t *Transformer) buildIoTCoreToPubSub(core, pubSub resources.Resource) {
@@ -42,7 +45,7 @@ func (t *Transformer) buildPubSubToFunction(pubSub, function resources.Resource)
 	t.functionSubscriberByPubSubID[pubSubID] = function
 
 	functionID := function.ID()
-	t.pubSubByFunctionID[functionID] = append(t.pubSubByFunctionID[functionID], pubSub)
+	t.pubSubsToFunctionID[functionID] = append(t.pubSubsToFunctionID[functionID], pubSub)
 }
 
 func (t *Transformer) buildPubSubToDataFlow(pubSub, dataFlow resources.Resource) {

@@ -43,7 +43,7 @@ func (t *Transformer) buildPubSubs() (result []*config.PubSub) {
 
 		var pushEndpoint string
 		if fn, ok := t.functionSubscriberByPubSubID[ps.ID()]; ok {
-			pushEndpoint = fn.Value()
+			pushEndpoint = fmt.Sprintf("google_cloudfunctions_function.%s_function.name", strcase.ToSnake(fn.Value()))
 		}
 
 		result = append(result, &config.PubSub{Name: ps.Value(), Labels: labels, PushEnpoint: pushEndpoint})

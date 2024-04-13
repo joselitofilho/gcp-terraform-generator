@@ -17,7 +17,8 @@ type Transformer struct {
 	functionPublisherByPubSubID  map[string][]resources.Resource
 	functionSubscriberByPubSubID map[string]resources.Resource
 	pubSubByIoTCoreID            map[string][]resources.Resource
-	pubSubByFunctionID           map[string][]resources.Resource
+	pubSubsToFunctionID          map[string][]resources.Resource
+	pubSubsFromFunctionID        map[string][]resources.Resource
 	inputPubSubByDataFlowID      map[string][]resources.Resource
 	outputPubSubByDataFlowID     map[string][]resources.Resource
 	storageByDataFlowID          map[string][]resources.Resource
@@ -36,7 +37,8 @@ func NewTransformer(yamlConfig *config.Config, resc *resources.ResourceCollectio
 		functionPublisherByPubSubID:  map[string][]resources.Resource{},
 		functionSubscriberByPubSubID: map[string]resources.Resource{},
 		pubSubByIoTCoreID:            map[string][]resources.Resource{},
-		pubSubByFunctionID:           map[string][]resources.Resource{},
+		pubSubsToFunctionID:          map[string][]resources.Resource{},
+		pubSubsFromFunctionID:        map[string][]resources.Resource{},
 		inputPubSubByDataFlowID:      map[string][]resources.Resource{},
 		outputPubSubByDataFlowID:     map[string][]resources.Resource{},
 		storageByDataFlowID:          map[string][]resources.Resource{},

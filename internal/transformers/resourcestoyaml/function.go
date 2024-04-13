@@ -28,8 +28,14 @@ func (t *Transformer) buildFunctions() (result []*config.Function) {
 		fnName := fn.Value()
 		envars := map[string]string{}
 
-		for _, ps := range t.pubSubByFunctionID[fn.ID()] {
-			k := fmt.Sprintf("%s_TOPIC_NAME", strcase.ToSNAKE(ps.Value()))
+		for _, ps := range t.pubSubsToFunctionID[fn.ID()] {
+			k := fmt.Sprintf("%s_FROM_TOPIC_NAME", strcase.ToSNAKE(ps.Value()))
+			v := fmt.Sprintf("google_pubsub_topic.%s_topic.name", strcase.ToSnake(ps.Value()))
+			envars[k] = v
+		}
+
+		for _, ps := range t.pubSubsFromFunctionID[fn.ID()] {
+			k := fmt.Sprintf("%s_TO_TOPIC_NAME", strcase.ToSNAKE(ps.Value()))
 			v := fmt.Sprintf("google_pubsub_topic.%s_topic.name", strcase.ToSnake(ps.Value()))
 			envars[k] = v
 		}
