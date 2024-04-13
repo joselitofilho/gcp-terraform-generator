@@ -9,7 +9,7 @@ require (
 	github.com/ettle/strcase v0.2.0
 	github.com/fatih/color v1.16.0
 	github.com/joselitofilho/drawio-parser-go v0.1.0
-	github.com/joselitofilho/hcl-parser-go v0.1.0
+	github.com/joselitofilho/hcl-parser-go v0.2.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/mock v0.4.0

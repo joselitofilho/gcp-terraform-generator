@@ -712,7 +712,9 @@ func TestTransformer_TransformFromPubSubToResource(t *testing.T) {
 	}
 
 	pubSubFuncResource := resources.NewGenericResource("1", "psfunc", gcpresources.PubSub.String())
+
 	functionResource := resources.NewGenericResource("2", "func", gcpresources.Function.String())
+	dataflowResource := resources.NewGenericResource("2", "dataflow", gcpresources.Dataflow.String())
 
 	tests := []struct {
 		name   string
@@ -773,6 +775,33 @@ func TestTransformer_TransformFromPubSubToResource(t *testing.T) {
 			want: &resources.ResourceCollection{
 				Resources:     []resources.Resource{pubSubFuncResource, functionResource},
 				Relationships: []resources.Relationship{{Source: pubSubFuncResource, Target: functionResource}},
+			},
+		},
+		{
+			name: "from pub sub to dataflow",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						psfuncTopicHCLResource,
+						psfuncSubscriptionHCLResource,
+						{
+							Type:   "google_dataflow_job",
+							Name:   "dataflow_df_job",
+							Labels: []string{"google_dataflow_job", "dataflow_df_job"},
+							Attributes: map[string]any{
+								"name": "dataflow",
+								"parameters": map[string]any{
+									"inputTopic": "google_pubsub_subscription.psfunc_subscription.name",
+								},
+							},
+						},
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources:     []resources.Resource{pubSubFuncResource, dataflowResource},
+				Relationships: []resources.Relationship{{Source: pubSubFuncResource, Target: dataflowResource}},
 			},
 		},
 	}

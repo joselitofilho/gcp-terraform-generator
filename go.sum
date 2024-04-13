@@ -36,6 +36,8 @@ github.com/joselitofilho/drawio-parser-go v0.1.0 h1:cWbF+q330kz6B3yJqycCCDQ1Nn2s
 github.com/joselitofilho/drawio-parser-go v0.1.0/go.mod h1:zUjTGv39xACAEOCriA/tAqCVTFBwqUR/mHVowaziNXk=
 github.com/joselitofilho/hcl-parser-go v0.1.0 h1:N+UEj5kTIA3BAhgzHSThCke2NI/eEq87m4z5IT6nJw8=
 github.com/joselitofilho/hcl-parser-go v0.1.0/go.mod h1:Bo8du9GpU07HNXTwmkwoNqdpNx6BmFmKz/aR3GaoxUo=
+github.com/joselitofilho/hcl-parser-go v0.2.0 h1:o6GqRRtVfspmkDep/LA7fXPDBT+9uCSFphj5Bo+OTDk=
+github.com/joselitofilho/hcl-parser-go v0.2.0/go.mod h1:Bo8du9GpU07HNXTwmkwoNqdpNx6BmFmKz/aR3GaoxUo=
 github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 h1:Z9n2FFNUXsshfwJMBgNA0RU6/i7WVaAegv3PtuIHPMs=
 github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51/go.mod h1:CzGEWj7cYgsdH8dAjBGEr58BoE7ScuLd+fwFZ44+/x8=
 github.com/mattn/go-colorable v0.1.2/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=

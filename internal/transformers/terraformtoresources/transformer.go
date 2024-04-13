@@ -408,15 +408,17 @@ func (t *Transformer) processDataFlow(conf *hcl.Resource) {
 	}
 
 	if parameters, ok := parameters.(map[string]any); ok {
-		sourceValue := replaceVars(conf.Attributes[attributeName].(string), t.tfConfig.Variables, t.tfConfig.Locals,
-			t.yamlConfig.Draw.ReplaceableTexts)
-		sourceGCS := gcpresources.ParseResourceGCS(sourceValue, conf.Labels)
+		if value, ok := conf.Attributes[attributeName].(string); ok {
+			value = replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
+				t.yamlConfig.Draw.ReplaceableTexts)
+			dataflowGCS := gcpresources.ParseResourceGCS(value, conf.Labels)
 
-		t.processDataFlowParameters(parameters, sourceGCS)
+			t.processDataFlowParameters(parameters, dataflowGCS)
+		}
 	}
 }
 
-func (t *Transformer) processDataFlowParameters(parameters map[string]any, sourceGCS *gcpresources.ResourceGCS) {
+func (t *Transformer) processDataFlowParameters(parameters map[string]any, dataflowGCS *gcpresources.ResourceGCS) {
 	for targetAttr, v := range parameters {
 		value, ok := v.(string)
 		if !ok {
@@ -428,8 +430,12 @@ func (t *Transformer) processDataFlowParameters(parameters map[string]any, sourc
 		var suggestionLabels []string
 
 		hasRelationship := true
+		isOutput := true
 
 		switch {
+		case strings.HasPrefix(targetAttr, "inputTopic"):
+			suggestionLabels = []string{gcpresources.LabelPubSubSubscription}
+			isOutput = false
 		case strings.HasPrefix(targetAttr, "outputTopic"):
 			suggestionLabels = []string{gcpresources.LabelPubSubSubscription}
 		case strings.HasPrefix(targetAttr, "outputTable"):
@@ -450,7 +456,11 @@ func (t *Transformer) processDataFlowParameters(parameters map[string]any, sourc
 				t.yamlConfig.Draw.ReplaceableTexts)
 			targetGCS := gcpresources.ParseResourceGCS(targetValue, suggestionLabels)
 
-			t.relationshipsMap[sourceGCS] = append(t.relationshipsMap[sourceGCS], targetGCS)
+			if isOutput {
+				t.relationshipsMap[dataflowGCS] = append(t.relationshipsMap[dataflowGCS], targetGCS)
+			} else {
+				t.relationshipsMap[targetGCS] = append(t.relationshipsMap[targetGCS], dataflowGCS)
+			}
 		}
 	}
 }
