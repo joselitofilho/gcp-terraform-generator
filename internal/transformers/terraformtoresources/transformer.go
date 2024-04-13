@@ -512,6 +512,17 @@ func (t *Transformer) processPubSubSubscription(conf *hcl.Resource) {
 
 	t.pbSubscriptionGCSByName[name] = subsGCS
 	t.pubSubByPubSubSubscriptionLabel[label] = topicGCS
+
+	t.processRelationshipByAttrsMap(conf, attributeName, "push_config", t.processPubSubSubsPushConfig)
+}
+
+func (t *Transformer) processPubSubSubsPushConfig(key string) (hasRelationship bool, suggestionLabels []string) {
+	if key == "push_endpoint" {
+		suggestionLabels = append(suggestionLabels, gcpresources.LabelFunction)
+		hasRelationship = true
+	}
+
+	return
 }
 
 func (t *Transformer) processStorage(conf *hcl.Resource) {

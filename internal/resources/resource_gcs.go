@@ -15,6 +15,7 @@ func ParseResourceGCS(gcs string, labels []string) *ResourceGCS {
 	case strings.HasPrefix(gcs, "gs://"):
 		gcsType, name, label = parseGCSByGS(gcs)
 	case strings.HasPrefix(gcs, "http"):
+		gcsType, name, label = parseGCSByURL(gcs)
 	default:
 		gcsType, name, label = parseGCSGeneric(gcs)
 	}
@@ -45,6 +46,20 @@ func parseGCSByGS(gcs string) (gcsType, name, label string) {
 			} else {
 				name = parts[0]
 			}
+		}
+	}
+
+	return
+}
+
+func parseGCSByURL(gcs string) (gcsType, name, label string) {
+	parts := strings.Split(gcs, "//")
+
+	if len(parts) > 1 {
+		parts = strings.Split(parts[1], "/")
+
+		if len(parts) > 0 {
+			name = parts[len(parts)-1]
 		}
 	}
 

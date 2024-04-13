@@ -37,6 +37,15 @@ var (
 		},
 	}
 
+	funcHCLResource = &hcl.Resource{
+		Type:   "google_cloudfunctions_function",
+		Name:   "func_function",
+		Labels: []string{"google_cloudfunctions_function", "func_function"},
+		Attributes: map[string]any{
+			"name": "func",
+		},
+	}
+
 	psengineTopicHCLResource = &hcl.Resource{
 		Type:   "google_pubsub_topic",
 		Name:   "psengine_topic",
@@ -198,16 +207,7 @@ func TestTransformer_Transform(t *testing.T) {
 			fields: fields{
 				yamlConfig: &config.Config{},
 				tfConfig: &hcl.Config{
-					Resources: []*hcl.Resource{
-						{
-							Type:   "google_cloudfunctions_function",
-							Name:   "func_function",
-							Labels: []string{"google_cloudfunctions_function", "func_function"},
-							Attributes: map[string]any{
-								"name": "func",
-							},
-						},
-					},
+					Resources: []*hcl.Resource{funcHCLResource},
 				},
 			},
 			want: &resources.ResourceCollection{
@@ -685,6 +685,94 @@ func TestTransformer_TransformFromIoTCoreToResource(t *testing.T) {
 					{Source: iotCoreResource, Target: pubSubAppEngineResource},
 					{Source: iotCoreResource, Target: pubSubFuncResource},
 				},
+			},
+		},
+	}
+
+	for i := range tests {
+		tc := tests[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			tr := NewTransformer(
+				tc.fields.yamlConfig,
+				tc.fields.tfConfig,
+			)
+
+			got := tr.Transform()
+
+			require.True(t, tc.want.Equal(got))
+		})
+	}
+}
+
+func TestTransformer_TransformFromPubSubToResource(t *testing.T) {
+	type fields struct {
+		yamlConfig *config.Config
+		tfConfig   *hcl.Config
+	}
+
+	pubSubFuncResource := resources.NewGenericResource("1", "psfunc", gcpresources.PubSub.String())
+	functionResource := resources.NewGenericResource("2", "func", gcpresources.Function.String())
+
+	tests := []struct {
+		name   string
+		fields fields
+		want   *resources.ResourceCollection
+	}{
+		{
+			name: "from pub sub to function",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						psfuncTopicHCLResource,
+						{
+							Type:   "google_pubsub_subscription",
+							Name:   "psfunc_subscription",
+							Labels: []string{"google_pubsub_subscription", "psfunc_subscription"},
+							Attributes: map[string]any{
+								"name":  "psfunc-subscription",
+								"topic": "google_pubsub_topic.psfunc_topic.name",
+								"push_config": map[string]any{
+									"push_endpoint": "google_cloudfunctions_function.func_function.https_trigger_url",
+								},
+							},
+						},
+						funcHCLResource,
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources:     []resources.Resource{pubSubFuncResource, functionResource},
+				Relationships: []resources.Relationship{{Source: pubSubFuncResource, Target: functionResource}},
+			},
+		},
+		{
+			name: "from pub sub to function as https url",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						psfuncTopicHCLResource,
+						{
+							Type:   "google_pubsub_subscription",
+							Name:   "psfunc_subscription",
+							Labels: []string{"google_pubsub_subscription", "psfunc_subscription"},
+							Attributes: map[string]any{
+								"name":  "psfunc-subscription",
+								"topic": "google_pubsub_topic.psfunc_topic.name",
+								"push_config": map[string]any{
+									"push_endpoint": "https://${var.region}-${var.project_id}.cloudfunctions.net/func",
+								},
+							},
+						},
+						funcHCLResource,
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources:     []resources.Resource{pubSubFuncResource, functionResource},
+				Relationships: []resources.Relationship{{Source: pubSubFuncResource, Target: functionResource}},
 			},
 		},
 	}
