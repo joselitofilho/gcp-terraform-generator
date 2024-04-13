@@ -173,6 +173,7 @@ func (t *Transformer) getResourceByGCS(gcs *gcpresources.ResourceGCS) resources.
 func (t *Transformer) getResourceByGCSName(gcs *gcpresources.ResourceGCS) (resource resources.Resource) {
 	switch gcs.Type {
 	case gcpresources.LabelAppEngine:
+		resource = t.appEngineByName[gcs.Name]
 	case gcpresources.LabelBigQueryTable:
 		resource = t.bqTableByName[gcs.Name]
 	case gcpresources.LabelBigTable:
@@ -401,7 +402,7 @@ func (t *Transformer) processBigQueryTable(conf *hcl.Resource) {
 }
 
 func (t *Transformer) processBigTable(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.BigTable, "name", suffixBigTable, t.bigTableByName, t.bigTableByLabel)
+	t.processResource(conf, gcpresources.BigTable, attributeName, suffixBigTable, t.bigTableByName, t.bigTableByLabel)
 }
 
 func (t *Transformer) processDataFlow(conf *hcl.Resource) {
@@ -512,7 +513,30 @@ func (t *Transformer) processIoTCoreEventNotificationConfigs(
 }
 
 func (t *Transformer) processPubSub(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.PubSub, "name", suffixPubSub, t.pubSubByName, t.pubSubByLabel)
+	t.processResource(conf, gcpresources.PubSub, attributeName, suffixPubSub, t.pubSubByName, t.pubSubByLabel)
+
+	if labels, ok := conf.Attributes["labels"]; ok {
+		if labelsMap, ok := labels.(map[string]any); ok {
+			sourceValue := replaceVars(conf.Attributes[attributeName].(string), t.tfConfig.Variables, t.tfConfig.Locals,
+				t.yamlConfig.Draw.ReplaceableTexts)
+			sourceGCS := gcpresources.ParseResourceGCS(sourceValue, conf.Labels)
+
+			for k, v := range labelsMap {
+				if strings.HasSuffix(k, "subscriber") {
+					if value, ok := v.(string); ok {
+						value = extractTextFromTFVar(value)
+
+						targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
+							t.yamlConfig.Draw.ReplaceableTexts)
+						targetGCS := gcpresources.ParseResourceGCS(targetValue, nil)
+
+						t.relationshipsMap[sourceGCS] = append(t.relationshipsMap[sourceGCS], targetGCS)
+					}
+				}
+			}
+		}
+	}
+
 }
 
 func (t *Transformer) processPubSubSubscription(conf *hcl.Resource) {
@@ -542,5 +566,5 @@ func (t *Transformer) processPubSubSubsPushConfig(key string) (hasRelationship b
 }
 
 func (t *Transformer) processStorage(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.Storage, "name", suffixStorage, t.storageByName, t.storageByLabel)
+	t.processResource(conf, gcpresources.Storage, attributeName, suffixStorage, t.storageByName, t.storageByLabel)
 }

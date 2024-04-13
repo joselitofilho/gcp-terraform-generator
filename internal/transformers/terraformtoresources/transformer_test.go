@@ -18,6 +18,16 @@ var bqTableSchema = `<<EOF
 EOF`
 
 var (
+	appEngineHCLResource = &hcl.Resource{
+		Type:   "google_app_engine_application",
+		Name:   "engine_app",
+		Labels: []string{"google_app_engine_application", "engine_app"},
+		Attributes: map[string]any{
+			"project":     "var.project_id",
+			"location_id": "US",
+		},
+	}
+
 	datasetHCLResource = &hcl.Resource{
 		Type:   "google_bigquery_dataset",
 		Name:   "dataset_dataset",
@@ -715,6 +725,7 @@ func TestTransformer_TransformFromPubSubToResource(t *testing.T) {
 
 	functionResource := resources.NewGenericResource("2", "func", gcpresources.Function.String())
 	dataflowResource := resources.NewGenericResource("2", "dataflow", gcpresources.Dataflow.String())
+	appEngineResource := resources.NewGenericResource("2", "engine", gcpresources.AppEngine.String())
 
 	tests := []struct {
 		name   string
@@ -802,6 +813,33 @@ func TestTransformer_TransformFromPubSubToResource(t *testing.T) {
 			want: &resources.ResourceCollection{
 				Resources:     []resources.Resource{pubSubFuncResource, dataflowResource},
 				Relationships: []resources.Relationship{{Source: pubSubFuncResource, Target: dataflowResource}},
+			},
+		},
+		{
+			name: "from pub sub to appengine",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						{
+							Type:   "google_pubsub_topic",
+							Name:   "psfunc_topic",
+							Labels: []string{"google_pubsub_topic", "psfunc_topic"},
+							Attributes: map[string]any{
+								"name": "psfunc",
+								"labels": map[string]any{
+									"engine-subscriber": "google_app_engine_application.engine_app.name",
+								},
+							},
+						},
+						psfuncSubscriptionHCLResource,
+						appEngineHCLResource,
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources:     []resources.Resource{pubSubFuncResource, appEngineResource},
+				Relationships: []resources.Relationship{{Source: pubSubFuncResource, Target: appEngineResource}},
 			},
 		},
 	}
