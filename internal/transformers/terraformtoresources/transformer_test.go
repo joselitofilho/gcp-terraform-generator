@@ -715,6 +715,145 @@ func TestTransformer_TransformFromFunctionToResource(t *testing.T) {
 	}
 }
 
+func TestTransformer_TransformFromIoTCoreToResource(t *testing.T) {
+	type fields struct {
+		yamlConfig *config.Config
+		tfConfig   *hcl.Config
+	}
+
+	iotCoreResource := resources.NewGenericResource("1", "core", gcpresources.IoTCore.String())
+
+	pubSubAppEngineResource := resources.NewGenericResource("2", "psengine", gcpresources.PubSub.String())
+	pubSubFuncResource := resources.NewGenericResource("3", "psfunc", gcpresources.PubSub.String())
+
+	tests := []struct {
+		name   string
+		fields fields
+		want   *resources.ResourceCollection
+	}{
+		{
+			name: "from iot core to pub sub",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						{
+							Type:   "google_cloudiot_registry",
+							Name:   "core_registry",
+							Labels: []string{"google_cloudiot_registry", "core_registry"},
+							Attributes: map[string]any{
+								"name": "core",
+								"event_notification_configs": map[string]any{
+									"psengine_topic_name": "google_pubsub_topic.psengine_topic.id",
+								},
+							},
+						},
+						{
+							Type:   "google_pubsub_topic",
+							Name:   "psengine_topic",
+							Labels: []string{"google_pubsub_topic", "psengine_topic"},
+							Attributes: map[string]any{
+								"name": "psengine",
+							},
+						},
+						{
+							Type:   "google_pubsub_subscription",
+							Name:   "psengine_subscription",
+							Labels: []string{"google_pubsub_subscription", "psengine_subscription"},
+							Attributes: map[string]any{
+								"name":  "psengine-subscription",
+								"topic": "google_pubsub_topic.psengine_topic.name",
+							},
+						},
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources:     []resources.Resource{iotCoreResource, pubSubAppEngineResource},
+				Relationships: []resources.Relationship{{Source: iotCoreResource, Target: pubSubAppEngineResource}},
+			},
+		},
+		{
+			name: "from iot core to multiple pub subs",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						{
+							Type:   "google_cloudiot_registry",
+							Name:   "core_registry",
+							Labels: []string{"google_cloudiot_registry", "core_registry"},
+							Attributes: map[string]any{
+								"name": "core",
+								"event_notification_configs": map[string]any{
+									"psengine_topic_name": "google_pubsub_topic.psengine_topic.id",
+									"psfunc_topic_name":   "google_pubsub_topic.psfunc_topic.id",
+								},
+							},
+						},
+						{
+							Type:   "google_pubsub_topic",
+							Name:   "psengine_topic",
+							Labels: []string{"google_pubsub_topic", "psengine_topic"},
+							Attributes: map[string]any{
+								"name": "psengine",
+							},
+						},
+						{
+							Type:   "google_pubsub_subscription",
+							Name:   "psengine_subscription",
+							Labels: []string{"google_pubsub_subscription", "psengine_subscription"},
+							Attributes: map[string]any{
+								"name":  "psengine-subscription",
+								"topic": "google_pubsub_topic.psengine_topic.name",
+							},
+						},
+						{
+							Type:   "google_pubsub_topic",
+							Name:   "psfunc_topic",
+							Labels: []string{"google_pubsub_topic", "psfunc_topic"},
+							Attributes: map[string]any{
+								"name": "psfunc",
+							},
+						},
+						{
+							Type:   "google_pubsub_subscription",
+							Name:   "psfunc_subscription",
+							Labels: []string{"google_pubsub_subscription", "psfunc_subscription"},
+							Attributes: map[string]any{
+								"name":  "psfunc-subscription",
+								"topic": "google_pubsub_topic.psfunc_topic.name",
+							},
+						},
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources: []resources.Resource{iotCoreResource, pubSubAppEngineResource, pubSubFuncResource},
+				Relationships: []resources.Relationship{
+					{Source: iotCoreResource, Target: pubSubAppEngineResource},
+					{Source: iotCoreResource, Target: pubSubFuncResource},
+				},
+			},
+		},
+	}
+
+	for i := range tests {
+		tc := tests[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			tr := NewTransformer(
+				tc.fields.yamlConfig,
+				tc.fields.tfConfig,
+			)
+
+			got := tr.Transform()
+
+			require.True(t, tc.want.Equal(got))
+		})
+	}
+}
+
 func TestTransformer_hasResourceMatched(t *testing.T) {
 	type fields struct {
 		yamlConfig *config.Config

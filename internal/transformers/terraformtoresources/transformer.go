@@ -452,7 +452,6 @@ func (t *Transformer) processFunctionEnvars(envars map[string]any, sourceGCS *gc
 
 		switch {
 		case strings.HasSuffix(k, "TOPIC_NAME"):
-			// value = ""
 			suggestionLabels = append(suggestionLabels, gcpresources.LabelPubSub)
 		default:
 			hasRelationship = false
@@ -469,7 +468,54 @@ func (t *Transformer) processFunctionEnvars(envars map[string]any, sourceGCS *gc
 }
 
 func (t *Transformer) processIoTCore(conf *hcl.Resource) {
-	t.processResource(conf, gcpresources.IoTCore, "name", suffixIoTCore, t.iotCoreByName, t.iotCoreByLabel)
+	sourceAttribute := "name"
+
+	t.processResource(conf, gcpresources.IoTCore, sourceAttribute, suffixIoTCore, t.iotCoreByName, t.iotCoreByLabel)
+
+	eventNotificationConfigs, ok := conf.Attributes["event_notification_configs"]
+	if !ok {
+		return
+	}
+
+	sourceValue := replaceVars(conf.Attributes[sourceAttribute].(string), t.tfConfig.Variables, t.tfConfig.Locals,
+		t.yamlConfig.Draw.ReplaceableTexts)
+	sourceGCS := gcpresources.ParseResourceGCS(sourceValue, conf.Labels)
+
+	if eventNotificationConfigs, ok := eventNotificationConfigs.(map[string]any); ok {
+		t.processIoTCoreEventNotificationConfigs(eventNotificationConfigs, sourceGCS)
+	}
+}
+
+func (t *Transformer) processIoTCoreEventNotificationConfigs(
+	eventNotificationConfigs map[string]any, sourceGCS *gcpresources.ResourceGCS,
+) {
+	for k, v := range eventNotificationConfigs {
+		value, ok := v.(string)
+		if !ok {
+			continue
+		}
+
+		value = extractTextFromTFVar(value)
+
+		var suggestionLabels []string
+
+		hasRelationship := true
+
+		switch {
+		case strings.HasSuffix(k, "topic_name"):
+			suggestionLabels = append(suggestionLabels, gcpresources.LabelPubSub)
+		default:
+			hasRelationship = false
+		}
+
+		if hasRelationship {
+			targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
+				t.yamlConfig.Draw.ReplaceableTexts)
+			targetGCS := gcpresources.ParseResourceGCS(targetValue, suggestionLabels)
+
+			t.relationshipsMap[sourceGCS] = append(t.relationshipsMap[sourceGCS], targetGCS)
+		}
+	}
 }
 
 func (t *Transformer) processPubSub(conf *hcl.Resource) {
