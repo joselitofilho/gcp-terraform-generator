@@ -458,14 +458,14 @@ func (t *Transformer) processDataFlowParameters(parameters map[string]any, sourc
 func (t *Transformer) processFunction(conf *hcl.Resource) {
 	t.processResource(conf, gcpresources.Function, attributeName, suffixFunction, t.functionByName, t.functionByLabel)
 
-	t.processRelationshipByAttrsMap(conf, attributeName, "environment_variables", t.processFunctionEnvars)
+	t.processRelationshipByAttrsMap(conf, attributeName, "environment_variables", t.processFunctionEnvarsToResource)
 }
 
-func (t *Transformer) processFunctionEnvars(key string) (hasRelationship bool, suggestionLabels []string) {
+func (t *Transformer) processFunctionEnvarsToResource(key string) (hasRelationship bool, suggestionLabels []string) {
 	hasRelationship = true
 
 	switch {
-	case strings.HasSuffix(key, "TOPIC_NAME"):
+	case strings.HasSuffix(key, "TO_TOPIC_NAME"):
 		suggestionLabels = append(suggestionLabels, gcpresources.LabelPubSub)
 	default:
 		hasRelationship = false

@@ -546,7 +546,7 @@ func TestTransformer_TransformFromFunctionToResource(t *testing.T) {
 							Attributes: map[string]any{
 								"name": "func",
 								"environment_variables": map[string]any{
-									"PSENGINE_TOPIC_NAME": "google_pubsub_topic.psengine_topic.name",
+									"PSENGINE_TO_TOPIC_NAME": "google_pubsub_topic.psengine_topic.name",
 								},
 							},
 						},
@@ -573,8 +573,8 @@ func TestTransformer_TransformFromFunctionToResource(t *testing.T) {
 							Attributes: map[string]any{
 								"name": "func",
 								"environment_variables": map[string]any{
-									"PSENGINE_TOPIC_NAME": "google_pubsub_topic.psengine_topic.name",
-									"PSFUNC_TOPIC_NAME":   "psfunc",
+									"PSENGINE_TO_TOPIC_NAME": "google_pubsub_topic.psengine_topic.name",
+									"PSFUNC_TO_TOPIC_NAME":   "psfunc",
 								},
 							},
 						},
