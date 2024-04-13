@@ -1,3 +1,4 @@
+//nolint:dupl // There is no problem to write similar test cases.
 package terraformtoresources
 
 import (
@@ -15,6 +16,73 @@ import (
 var bqTableSchema = `<<EOF
 # Define your BigQuery schema here
 EOF`
+
+var (
+	datasetHCLResource = &hcl.Resource{
+		Type:   "google_bigquery_dataset",
+		Name:   "dataset_dataset",
+		Labels: []string{"google_bigquery_dataset", "dataset_dataset"},
+		Attributes: map[string]any{
+			"dataset_id": "dataset",
+		},
+	}
+	bqTableHCLResource = &hcl.Resource{
+		Type:   "google_bigquery_table",
+		Name:   "dataset_bq_table",
+		Labels: []string{"google_bigquery_table", "dataset_bq_table"},
+		Attributes: map[string]any{
+			"dataset_id": "google_bigquery_dataset.dataset_dataset.dataset_id",
+			"table_id":   "bq",
+			"schema":     bqTableSchema,
+		},
+	}
+
+	psengineTopicHCLResource = &hcl.Resource{
+		Type:   "google_pubsub_topic",
+		Name:   "psengine_topic",
+		Labels: []string{"google_pubsub_topic", "psengine_topic"},
+		Attributes: map[string]any{
+			"name": "psengine",
+		},
+	}
+	psengineSubscriptionHCLResource = &hcl.Resource{
+		Type:   "google_pubsub_subscription",
+		Name:   "psengine_subscription",
+		Labels: []string{"google_pubsub_subscription", "psengine_subscription"},
+		Attributes: map[string]any{
+			"name":  "psengine-subscription",
+			"topic": "google_pubsub_topic.psengine_topic.name",
+		},
+	}
+
+	psfuncTopicHCLResource = &hcl.Resource{
+		Type:   "google_pubsub_topic",
+		Name:   "psfunc_topic",
+		Labels: []string{"google_pubsub_topic", "psfunc_topic"},
+		Attributes: map[string]any{
+			"name": "psfunc",
+		},
+	}
+	psfuncSubscriptionHCLResource = &hcl.Resource{
+		Type:   "google_pubsub_subscription",
+		Name:   "psfunc_subscription",
+		Labels: []string{"google_pubsub_subscription", "psfunc_subscription"},
+		Attributes: map[string]any{
+			"name":  "psfunc-subscription",
+			"topic": "google_pubsub_topic.psfunc_topic.name",
+		},
+	}
+
+	storageBucketHCLResource = &hcl.Resource{
+		Type:   "google_storage_bucket",
+		Name:   "storage_bucket",
+		Labels: []string{"google_storage_bucket", "storage_bucket"},
+		Attributes: map[string]any{
+			"name":     "storage",
+			"location": "US",
+		},
+	}
+)
 
 func TestTransformer_Transform(t *testing.T) {
 	type fields struct {
@@ -68,24 +136,8 @@ func TestTransformer_Transform(t *testing.T) {
 				yamlConfig: &config.Config{},
 				tfConfig: &hcl.Config{
 					Resources: []*hcl.Resource{
-						{
-							Type:   "google_bigquery_dataset",
-							Name:   "dataset_dataset",
-							Labels: []string{"google_bigquery_dataset", "dataset_dataset"},
-							Attributes: map[string]any{
-								"dataset_id": "dataset",
-							},
-						},
-						{
-							Type:   "google_bigquery_table",
-							Name:   "dataset_bq_table",
-							Labels: []string{"google_bigquery_table", "dataset_bq_table"},
-							Attributes: map[string]any{
-								"dataset_id": "google_bigquery_dataset.dataset_dataset.dataset_id",
-								"table_id":   "bq",
-								"schema":     bqTableSchema,
-							},
-						},
+						datasetHCLResource,
+						bqTableHCLResource,
 					},
 				},
 			},
@@ -192,21 +244,12 @@ func TestTransformer_Transform(t *testing.T) {
 			fields: fields{
 				yamlConfig: &config.Config{},
 				tfConfig: &hcl.Config{
-					Resources: []*hcl.Resource{
-						{
-							Type:   "google_pubsub_topic",
-							Name:   "pubsub_topic",
-							Labels: []string{"google_pubsub_topic", "pubsub_topic"},
-							Attributes: map[string]any{
-								"name": "pubsub",
-							},
-						},
-					},
+					Resources: []*hcl.Resource{psengineSubscriptionHCLResource},
 				},
 			},
 			want: &resources.ResourceCollection{
 				Resources: []resources.Resource{
-					resources.NewGenericResource("1", "pubsub", gcpresources.PubSub.String())},
+					resources.NewGenericResource("1", "psengine", gcpresources.PubSub.String())},
 				Relationships: []resources.Relationship{},
 			},
 		},
@@ -215,16 +258,7 @@ func TestTransformer_Transform(t *testing.T) {
 			fields: fields{
 				yamlConfig: &config.Config{},
 				tfConfig: &hcl.Config{
-					Resources: []*hcl.Resource{
-						{
-							Type:   "google_storage_bucket",
-							Name:   "storage_bucket",
-							Labels: []string{"google_storage_bucket", "storage_bucket"},
-							Attributes: map[string]any{
-								"name": "storage",
-							},
-						},
-					},
+					Resources: []*hcl.Resource{storageBucketHCLResource},
 				},
 			},
 			want: &resources.ResourceCollection{
@@ -287,24 +321,8 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 								},
 							},
 						},
-						{
-							Type:   "google_bigquery_dataset",
-							Name:   "dataset_dataset",
-							Labels: []string{"google_bigquery_dataset", "dataset_dataset"},
-							Attributes: map[string]any{
-								"dataset_id": "dataset",
-							},
-						},
-						{
-							Type:   "google_bigquery_table",
-							Name:   "dataset_bq_table",
-							Labels: []string{"google_bigquery_table", "dataset_bq_table"},
-							Attributes: map[string]any{
-								"dataset_id": "google_bigquery_dataset.dataset_dataset.dataset_id",
-								"table_id":   "bq",
-								"schema":     bqTableSchema,
-							},
-						},
+						datasetHCLResource,
+						bqTableHCLResource,
 					},
 				},
 			},
@@ -333,24 +351,8 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 								},
 							},
 						},
-						{
-							Type:   "google_bigquery_dataset",
-							Name:   "dataset_dataset",
-							Labels: []string{"google_bigquery_dataset", "dataset_dataset"},
-							Attributes: map[string]any{
-								"dataset_id": "dataset",
-							},
-						},
-						{
-							Type:   "google_bigquery_table",
-							Name:   "dataset_bq_table",
-							Labels: []string{"google_bigquery_table", "dataset_bq_table"},
-							Attributes: map[string]any{
-								"dataset_id": "google_bigquery_dataset.dataset_dataset.dataset_id",
-								"table_id":   "bq",
-								"schema":     bqTableSchema,
-							},
-						},
+						datasetHCLResource,
+						bqTableHCLResource,
 						{
 							Type:   "google_bigquery_table",
 							Name:   "dataset_backup_table",
@@ -389,23 +391,8 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 								},
 							},
 						},
-						{
-							Type:   "google_pubsub_topic",
-							Name:   "psengine_topic",
-							Labels: []string{"google_pubsub_topic", "psengine_topic"},
-							Attributes: map[string]any{
-								"name": "psengine",
-							},
-						},
-						{
-							Type:   "google_pubsub_subscription",
-							Name:   "psengine_subscription",
-							Labels: []string{"google_pubsub_subscription", "psengine_subscription"},
-							Attributes: map[string]any{
-								"name":  "psengine-subscription",
-								"topic": "google_pubsub_topic.psengine_topic.name",
-							},
-						},
+						psengineTopicHCLResource,
+						psengineSubscriptionHCLResource,
 					},
 				},
 			},
@@ -432,40 +419,10 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 								},
 							},
 						},
-						{
-							Type:   "google_pubsub_topic",
-							Name:   "psengine_topic",
-							Labels: []string{"google_pubsub_topic", "psengine_topic"},
-							Attributes: map[string]any{
-								"name": "psengine",
-							},
-						},
-						{
-							Type:   "google_pubsub_subscription",
-							Name:   "psengine_subscription",
-							Labels: []string{"google_pubsub_subscription", "psengine_subscription"},
-							Attributes: map[string]any{
-								"name":  "psengine-subscription",
-								"topic": "google_pubsub_topic.psengine_topic.name",
-							},
-						},
-						{
-							Type:   "google_pubsub_topic",
-							Name:   "psfunc_topic",
-							Labels: []string{"google_pubsub_topic", "psfunc_topic"},
-							Attributes: map[string]any{
-								"name": "psfunc",
-							},
-						},
-						{
-							Type:   "google_pubsub_subscription",
-							Name:   "psfunc_subscription",
-							Labels: []string{"google_pubsub_subscription", "psfunc_subscription"},
-							Attributes: map[string]any{
-								"name":  "psfunc-subscription",
-								"topic": "google_pubsub_topic.psfunc_topic.name",
-							},
-						},
+						psengineTopicHCLResource,
+						psengineSubscriptionHCLResource,
+						psfuncTopicHCLResource,
+						psfuncSubscriptionHCLResource,
 					},
 				},
 			},
@@ -494,15 +451,7 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 								},
 							},
 						},
-						{
-							Type:   "google_storage_bucket",
-							Name:   "storage_bucket",
-							Labels: []string{"google_storage_bucket", "storage_bucket"},
-							Attributes: map[string]any{
-								"name":     "storage",
-								"location": "US",
-							},
-						},
+						storageBucketHCLResource,
 					},
 				},
 			},
@@ -529,15 +478,7 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 								},
 							},
 						},
-						{
-							Type:   "google_storage_bucket",
-							Name:   "storage_bucket",
-							Labels: []string{"google_storage_bucket", "storage_bucket"},
-							Attributes: map[string]any{
-								"name":     "storage",
-								"location": "US",
-							},
-						},
+						storageBucketHCLResource,
 						{
 							Type:   "google_storage_bucket",
 							Name:   "backup_bucket",
@@ -609,23 +550,8 @@ func TestTransformer_TransformFromFunctionToResource(t *testing.T) {
 								},
 							},
 						},
-						{
-							Type:   "google_pubsub_topic",
-							Name:   "psengine_topic",
-							Labels: []string{"google_pubsub_topic", "psengine_topic"},
-							Attributes: map[string]any{
-								"name": "psengine",
-							},
-						},
-						{
-							Type:   "google_pubsub_subscription",
-							Name:   "psengine_subscription",
-							Labels: []string{"google_pubsub_subscription", "psengine_subscription"},
-							Attributes: map[string]any{
-								"name":  "psengine-subscription",
-								"topic": "google_pubsub_topic.psengine_topic.name",
-							},
-						},
+						psengineTopicHCLResource,
+						psengineSubscriptionHCLResource,
 					},
 				},
 			},
@@ -652,40 +578,10 @@ func TestTransformer_TransformFromFunctionToResource(t *testing.T) {
 								},
 							},
 						},
-						{
-							Type:   "google_pubsub_topic",
-							Name:   "psengine_topic",
-							Labels: []string{"google_pubsub_topic", "psengine_topic"},
-							Attributes: map[string]any{
-								"name": "psengine",
-							},
-						},
-						{
-							Type:   "google_pubsub_subscription",
-							Name:   "psengine_subscription",
-							Labels: []string{"google_pubsub_subscription", "psengine_subscription"},
-							Attributes: map[string]any{
-								"name":  "psengine-subscription",
-								"topic": "google_pubsub_topic.psengine_topic.name",
-							},
-						},
-						{
-							Type:   "google_pubsub_topic",
-							Name:   "psfunc_topic",
-							Labels: []string{"google_pubsub_topic", "psfunc_topic"},
-							Attributes: map[string]any{
-								"name": "psfunc",
-							},
-						},
-						{
-							Type:   "google_pubsub_subscription",
-							Name:   "psfunc_subscription",
-							Labels: []string{"google_pubsub_subscription", "psfunc_subscription"},
-							Attributes: map[string]any{
-								"name":  "psfunc-subscription",
-								"topic": "google_pubsub_topic.psfunc_topic.name",
-							},
-						},
+						psengineTopicHCLResource,
+						psengineSubscriptionHCLResource,
+						psfuncTopicHCLResource,
+						psfuncSubscriptionHCLResource,
 					},
 				},
 			},
@@ -748,23 +644,8 @@ func TestTransformer_TransformFromIoTCoreToResource(t *testing.T) {
 								},
 							},
 						},
-						{
-							Type:   "google_pubsub_topic",
-							Name:   "psengine_topic",
-							Labels: []string{"google_pubsub_topic", "psengine_topic"},
-							Attributes: map[string]any{
-								"name": "psengine",
-							},
-						},
-						{
-							Type:   "google_pubsub_subscription",
-							Name:   "psengine_subscription",
-							Labels: []string{"google_pubsub_subscription", "psengine_subscription"},
-							Attributes: map[string]any{
-								"name":  "psengine-subscription",
-								"topic": "google_pubsub_topic.psengine_topic.name",
-							},
-						},
+						psengineTopicHCLResource,
+						psengineSubscriptionHCLResource,
 					},
 				},
 			},
@@ -791,40 +672,10 @@ func TestTransformer_TransformFromIoTCoreToResource(t *testing.T) {
 								},
 							},
 						},
-						{
-							Type:   "google_pubsub_topic",
-							Name:   "psengine_topic",
-							Labels: []string{"google_pubsub_topic", "psengine_topic"},
-							Attributes: map[string]any{
-								"name": "psengine",
-							},
-						},
-						{
-							Type:   "google_pubsub_subscription",
-							Name:   "psengine_subscription",
-							Labels: []string{"google_pubsub_subscription", "psengine_subscription"},
-							Attributes: map[string]any{
-								"name":  "psengine-subscription",
-								"topic": "google_pubsub_topic.psengine_topic.name",
-							},
-						},
-						{
-							Type:   "google_pubsub_topic",
-							Name:   "psfunc_topic",
-							Labels: []string{"google_pubsub_topic", "psfunc_topic"},
-							Attributes: map[string]any{
-								"name": "psfunc",
-							},
-						},
-						{
-							Type:   "google_pubsub_subscription",
-							Name:   "psfunc_subscription",
-							Labels: []string{"google_pubsub_subscription", "psfunc_subscription"},
-							Attributes: map[string]any{
-								"name":  "psfunc-subscription",
-								"topic": "google_pubsub_topic.psfunc_topic.name",
-							},
-						},
+						psengineTopicHCLResource,
+						psengineSubscriptionHCLResource,
+						psfuncTopicHCLResource,
+						psfuncSubscriptionHCLResource,
 					},
 				},
 			},

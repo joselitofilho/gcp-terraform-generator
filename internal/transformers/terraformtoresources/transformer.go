@@ -23,7 +23,11 @@ const (
 	suffixIoTCore       = "registry"
 	suffixPubSub        = "topic"
 	suffixStorage       = "bucket"
+
+	attributeName = "name"
 )
+
+type FNProcess func(key string) (hasRelationship bool, suggestionLabels []string)
 
 type Transformer struct {
 	yamlConfig *config.Config
@@ -293,14 +297,14 @@ func (t *Transformer) processTerraformResources() {
 }
 
 func (t *Transformer) processResource(
-	conf *hcl.Resource, resourceType gcpresources.ResourceType, attributeName, labelSuffix string,
+	conf *hcl.Resource, resourceType gcpresources.ResourceType, attribute, labelSuffix string,
 	resourcesByName, resourcesByLabel map[string]resources.Resource,
 ) {
 	label := conf.Labels[1]
 	name := getResourceNameFromLabel(label, "_"+labelSuffix)
 
-	if attributeName != EmptyAttributeName {
-		name = replaceVars(conf.Attributes[attributeName].(string), t.tfConfig.Variables, t.tfConfig.Locals,
+	if attribute != EmptyAttributeName {
+		name = replaceVars(conf.Attributes[attribute].(string), t.tfConfig.Variables, t.tfConfig.Locals,
 			t.yamlConfig.Draw.ReplaceableTexts)
 	}
 
@@ -311,6 +315,40 @@ func (t *Transformer) processResource(
 		t.resources = append(t.resources, resource)
 		resourcesByName[name] = resource
 		resourcesByLabel[label] = resource
+	}
+}
+
+func (t *Transformer) processRelationshipByAttrsMap(
+	conf *hcl.Resource, sourceAttr, targetAttr string, fnProcess FNProcess,
+) {
+	attrMap, ok := conf.Attributes[targetAttr]
+	if !ok {
+		return
+	}
+
+	sourceValue := replaceVars(conf.Attributes[sourceAttr].(string), t.tfConfig.Variables, t.tfConfig.Locals,
+		t.yamlConfig.Draw.ReplaceableTexts)
+	sourceGCS := gcpresources.ParseResourceGCS(sourceValue, conf.Labels)
+
+	if attrMap, ok := attrMap.(map[string]any); ok {
+		for k, v := range attrMap {
+			value, ok := v.(string)
+			if !ok {
+				continue
+			}
+
+			value = extractTextFromTFVar(value)
+
+			hasRelationship, suggestionLabels := fnProcess(k)
+
+			if hasRelationship {
+				targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
+					t.yamlConfig.Draw.ReplaceableTexts)
+				targetGCS := gcpresources.ParseResourceGCS(targetValue, suggestionLabels)
+
+				t.relationshipsMap[sourceGCS] = append(t.relationshipsMap[sourceGCS], targetGCS)
+			}
+		}
 	}
 }
 
@@ -361,9 +399,7 @@ func (t *Transformer) processBigTable(conf *hcl.Resource) {
 }
 
 func (t *Transformer) processDataFlow(conf *hcl.Resource) {
-	sourceAttribute := "name"
-
-	t.processResource(conf, gcpresources.Dataflow, sourceAttribute, suffixDataFlow, t.dataFlowByName, t.dataFlowByLabel)
+	t.processResource(conf, gcpresources.Dataflow, attributeName, suffixDataFlow, t.dataFlowByName, t.dataFlowByLabel)
 
 	parameters, ok := conf.Attributes["parameters"]
 	if !ok {
@@ -371,7 +407,7 @@ func (t *Transformer) processDataFlow(conf *hcl.Resource) {
 	}
 
 	if parameters, ok := parameters.(map[string]any); ok {
-		sourceValue := replaceVars(conf.Attributes[sourceAttribute].(string), t.tfConfig.Variables, t.tfConfig.Locals,
+		sourceValue := replaceVars(conf.Attributes[attributeName].(string), t.tfConfig.Variables, t.tfConfig.Locals,
 			t.yamlConfig.Draw.ReplaceableTexts)
 		sourceGCS := gcpresources.ParseResourceGCS(sourceValue, conf.Labels)
 
@@ -419,103 +455,44 @@ func (t *Transformer) processDataFlowParameters(parameters map[string]any, sourc
 }
 
 func (t *Transformer) processFunction(conf *hcl.Resource) {
-	sourceAttribute := "name"
+	t.processResource(conf, gcpresources.Function, attributeName, suffixFunction, t.functionByName, t.functionByLabel)
 
-	t.processResource(conf, gcpresources.Function, sourceAttribute, suffixFunction, t.functionByName, t.functionByLabel)
-
-	envars, ok := conf.Attributes["environment_variables"]
-	if !ok {
-		return
-	}
-
-	sourceValue := replaceVars(conf.Attributes[sourceAttribute].(string), t.tfConfig.Variables, t.tfConfig.Locals,
-		t.yamlConfig.Draw.ReplaceableTexts)
-	sourceGCS := gcpresources.ParseResourceGCS(sourceValue, conf.Labels)
-
-	if envars, ok := envars.(map[string]any); ok {
-		t.processFunctionEnvars(envars, sourceGCS)
-	}
+	t.processRelationshipByAttrsMap(conf, attributeName, "environment_variables", t.processFunctionEnvars)
 }
 
-func (t *Transformer) processFunctionEnvars(envars map[string]any, sourceGCS *gcpresources.ResourceGCS) {
-	for k, v := range envars {
-		value, ok := v.(string)
-		if !ok {
-			continue
-		}
+func (t *Transformer) processFunctionEnvars(key string) (hasRelationship bool, suggestionLabels []string) {
+	hasRelationship = true
 
-		value = extractTextFromTFVar(value)
-
-		var suggestionLabels []string
-
-		hasRelationship := true
-
-		switch {
-		case strings.HasSuffix(k, "TOPIC_NAME"):
-			suggestionLabels = append(suggestionLabels, gcpresources.LabelPubSub)
-		default:
-			hasRelationship = false
-		}
-
-		if hasRelationship {
-			targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
-				t.yamlConfig.Draw.ReplaceableTexts)
-			targetGCS := gcpresources.ParseResourceGCS(targetValue, suggestionLabels)
-
-			t.relationshipsMap[sourceGCS] = append(t.relationshipsMap[sourceGCS], targetGCS)
-		}
+	switch {
+	case strings.HasSuffix(key, "TOPIC_NAME"):
+		suggestionLabels = append(suggestionLabels, gcpresources.LabelPubSub)
+	default:
+		hasRelationship = false
 	}
+
+	return
 }
 
 func (t *Transformer) processIoTCore(conf *hcl.Resource) {
-	sourceAttribute := "name"
+	t.processResource(conf, gcpresources.IoTCore, attributeName, suffixIoTCore, t.iotCoreByName, t.iotCoreByLabel)
 
-	t.processResource(conf, gcpresources.IoTCore, sourceAttribute, suffixIoTCore, t.iotCoreByName, t.iotCoreByLabel)
-
-	eventNotificationConfigs, ok := conf.Attributes["event_notification_configs"]
-	if !ok {
-		return
-	}
-
-	sourceValue := replaceVars(conf.Attributes[sourceAttribute].(string), t.tfConfig.Variables, t.tfConfig.Locals,
-		t.yamlConfig.Draw.ReplaceableTexts)
-	sourceGCS := gcpresources.ParseResourceGCS(sourceValue, conf.Labels)
-
-	if eventNotificationConfigs, ok := eventNotificationConfigs.(map[string]any); ok {
-		t.processIoTCoreEventNotificationConfigs(eventNotificationConfigs, sourceGCS)
-	}
+	t.processRelationshipByAttrsMap(conf, attributeName, "event_notification_configs",
+		t.processIoTCoreEventNotificationConfigs)
 }
 
 func (t *Transformer) processIoTCoreEventNotificationConfigs(
-	eventNotificationConfigs map[string]any, sourceGCS *gcpresources.ResourceGCS,
-) {
-	for k, v := range eventNotificationConfigs {
-		value, ok := v.(string)
-		if !ok {
-			continue
-		}
+	value string,
+) (hasRelationship bool, suggestionLabels []string) {
+	hasRelationship = true
 
-		value = extractTextFromTFVar(value)
-
-		var suggestionLabels []string
-
-		hasRelationship := true
-
-		switch {
-		case strings.HasSuffix(k, "topic_name"):
-			suggestionLabels = append(suggestionLabels, gcpresources.LabelPubSub)
-		default:
-			hasRelationship = false
-		}
-
-		if hasRelationship {
-			targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
-				t.yamlConfig.Draw.ReplaceableTexts)
-			targetGCS := gcpresources.ParseResourceGCS(targetValue, suggestionLabels)
-
-			t.relationshipsMap[sourceGCS] = append(t.relationshipsMap[sourceGCS], targetGCS)
-		}
+	switch {
+	case strings.HasSuffix(value, "topic_name"):
+		suggestionLabels = append(suggestionLabels, gcpresources.LabelPubSub)
+	default:
+		hasRelationship = false
 	}
+
+	return
 }
 
 func (t *Transformer) processPubSub(conf *hcl.Resource) {
