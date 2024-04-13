@@ -512,7 +512,7 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 			},
 		},
 		{
-			name: "from dataflow to storages",
+			name: "from dataflow to multiple storages",
 			fields: fields{
 				yamlConfig: &config.Config{},
 				tfConfig: &hcl.Config{
@@ -555,6 +555,145 @@ func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 				Relationships: []resources.Relationship{
 					{Source: dataflowResource, Target: storageBucketResource},
 					{Source: dataflowResource, Target: backupBucketResource},
+				},
+			},
+		},
+	}
+
+	for i := range tests {
+		tc := tests[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			tr := NewTransformer(
+				tc.fields.yamlConfig,
+				tc.fields.tfConfig,
+			)
+
+			got := tr.Transform()
+
+			require.True(t, tc.want.Equal(got))
+		})
+	}
+}
+
+func TestTransformer_TransformFromFunctionToResource(t *testing.T) {
+	type fields struct {
+		yamlConfig *config.Config
+		tfConfig   *hcl.Config
+	}
+
+	functionResource := resources.NewGenericResource("1", "func", gcpresources.Function.String())
+
+	pubSubAppEngineResource := resources.NewGenericResource("2", "psengine", gcpresources.PubSub.String())
+	pubSubFuncResource := resources.NewGenericResource("3", "psfunc", gcpresources.PubSub.String())
+
+	tests := []struct {
+		name   string
+		fields fields
+		want   *resources.ResourceCollection
+	}{
+		{
+			name: "from function to pub sub",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						{
+							Type:   "google_cloudfunctions_function",
+							Name:   "func_function",
+							Labels: []string{"google_cloudfunctions_function", "func_function"},
+							Attributes: map[string]any{
+								"name": "func",
+								"environment_variables": map[string]any{
+									"PSENGINE_TOPIC_NAME": "google_pubsub_topic.psengine_topic.name",
+								},
+							},
+						},
+						{
+							Type:   "google_pubsub_topic",
+							Name:   "psengine_topic",
+							Labels: []string{"google_pubsub_topic", "psengine_topic"},
+							Attributes: map[string]any{
+								"name": "psengine",
+							},
+						},
+						{
+							Type:   "google_pubsub_subscription",
+							Name:   "psengine_subscription",
+							Labels: []string{"google_pubsub_subscription", "psengine_subscription"},
+							Attributes: map[string]any{
+								"name":  "psengine-subscription",
+								"topic": "google_pubsub_topic.psengine_topic.name",
+							},
+						},
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources:     []resources.Resource{functionResource, pubSubAppEngineResource},
+				Relationships: []resources.Relationship{{Source: functionResource, Target: pubSubAppEngineResource}},
+			},
+		},
+		{
+			name: "from function to multiple pub subs",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						{
+							Type:   "google_cloudfunctions_function",
+							Name:   "func_function",
+							Labels: []string{"google_cloudfunctions_function", "func_function"},
+							Attributes: map[string]any{
+								"name": "func",
+								"environment_variables": map[string]any{
+									"PSENGINE_TOPIC_NAME": "google_pubsub_topic.psengine_topic.name",
+									"PSFUNC_TOPIC_NAME":   "psfunc",
+								},
+							},
+						},
+						{
+							Type:   "google_pubsub_topic",
+							Name:   "psengine_topic",
+							Labels: []string{"google_pubsub_topic", "psengine_topic"},
+							Attributes: map[string]any{
+								"name": "psengine",
+							},
+						},
+						{
+							Type:   "google_pubsub_subscription",
+							Name:   "psengine_subscription",
+							Labels: []string{"google_pubsub_subscription", "psengine_subscription"},
+							Attributes: map[string]any{
+								"name":  "psengine-subscription",
+								"topic": "google_pubsub_topic.psengine_topic.name",
+							},
+						},
+						{
+							Type:   "google_pubsub_topic",
+							Name:   "psfunc_topic",
+							Labels: []string{"google_pubsub_topic", "psfunc_topic"},
+							Attributes: map[string]any{
+								"name": "psfunc",
+							},
+						},
+						{
+							Type:   "google_pubsub_subscription",
+							Name:   "psfunc_subscription",
+							Labels: []string{"google_pubsub_subscription", "psfunc_subscription"},
+							Attributes: map[string]any{
+								"name":  "psfunc-subscription",
+								"topic": "google_pubsub_topic.psfunc_topic.name",
+							},
+						},
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources: []resources.Resource{functionResource, pubSubAppEngineResource, pubSubFuncResource},
+				Relationships: []resources.Relationship{
+					{Source: functionResource, Target: pubSubAppEngineResource},
+					{Source: functionResource, Target: pubSubFuncResource},
 				},
 			},
 		},
