@@ -244,7 +244,7 @@ func TestTransformer_Transform(t *testing.T) {
 			fields: fields{
 				yamlConfig: &config.Config{},
 				tfConfig: &hcl.Config{
-					Resources: []*hcl.Resource{psengineSubscriptionHCLResource},
+					Resources: []*hcl.Resource{psengineTopicHCLResource, psengineSubscriptionHCLResource},
 				},
 			},
 			want: &resources.ResourceCollection{
