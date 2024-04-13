@@ -24,8 +24,9 @@ const (
 	suffixPubSub        = "topic"
 	suffixStorage       = "bucket"
 
-	attributeName  = "name"
-	attributeTopic = "topic"
+	attributeLabels = "labels"
+	attributeName   = "name"
+	attributeTopic  = "topic"
 )
 
 type FNProcess func(key string) (hasRelationship bool, suggestionLabels []string)
@@ -403,6 +404,28 @@ func (t *Transformer) processBigQueryTable(conf *hcl.Resource) {
 
 func (t *Transformer) processBigTable(conf *hcl.Resource) {
 	t.processResource(conf, gcpresources.BigTable, attributeName, suffixBigTable, t.bigTableByName, t.bigTableByLabel)
+
+	if labels, ok := conf.Attributes[attributeLabels]; ok {
+		if labelsMap, ok := labels.(map[string]any); ok {
+			bigTableValue := replaceVars(conf.Attributes[attributeName].(string), t.tfConfig.Variables, t.tfConfig.Locals,
+				t.yamlConfig.Draw.ReplaceableTexts)
+			bigTableGCS := gcpresources.ParseResourceGCS(bigTableValue, conf.Labels)
+
+			for k, v := range labelsMap {
+				if strings.HasSuffix(k, "sender") {
+					if value, ok := v.(string); ok {
+						value = extractTextFromTFVar(value)
+
+						targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
+							t.yamlConfig.Draw.ReplaceableTexts)
+						targetGCS := gcpresources.ParseResourceGCS(targetValue, nil)
+
+						t.relationshipsMap[targetGCS] = append(t.relationshipsMap[targetGCS], bigTableGCS)
+					}
+				}
+			}
+		}
+	}
 }
 
 func (t *Transformer) processDataFlow(conf *hcl.Resource) {
@@ -515,7 +538,7 @@ func (t *Transformer) processIoTCoreEventNotificationConfigs(
 func (t *Transformer) processPubSub(conf *hcl.Resource) {
 	t.processResource(conf, gcpresources.PubSub, attributeName, suffixPubSub, t.pubSubByName, t.pubSubByLabel)
 
-	if labels, ok := conf.Attributes["labels"]; ok {
+	if labels, ok := conf.Attributes[attributeLabels]; ok {
 		if labelsMap, ok := labels.(map[string]any); ok {
 			sourceValue := replaceVars(conf.Attributes[attributeName].(string), t.tfConfig.Variables, t.tfConfig.Locals,
 				t.yamlConfig.Draw.ReplaceableTexts)
@@ -536,7 +559,6 @@ func (t *Transformer) processPubSub(conf *hcl.Resource) {
 			}
 		}
 	}
-
 }
 
 func (t *Transformer) processPubSubSubscription(conf *hcl.Resource) {

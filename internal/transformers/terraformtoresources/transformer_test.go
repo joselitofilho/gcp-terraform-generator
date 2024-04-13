@@ -290,6 +290,64 @@ func TestTransformer_Transform(t *testing.T) {
 	}
 }
 
+func TestTransformer_TransformFromAppEngineToResource(t *testing.T) {
+	type fields struct {
+		yamlConfig *config.Config
+		tfConfig   *hcl.Config
+	}
+
+	appEngineResource := resources.NewGenericResource("1", "engine", gcpresources.AppEngine.String())
+	bigtableResource := resources.NewGenericResource("2", "bigtable-instance", gcpresources.BigTable.String())
+
+	tests := []struct {
+		name   string
+		fields fields
+		want   *resources.ResourceCollection
+	}{
+		{
+			name: "from app engine to big table",
+			fields: fields{
+				yamlConfig: &config.Config{},
+				tfConfig: &hcl.Config{
+					Resources: []*hcl.Resource{
+						appEngineHCLResource,
+						{
+							Type:   "google_bigtable_instance",
+							Name:   "bigtable_instance",
+							Labels: []string{"google_bigtable_instance", "bigtable_instance"},
+							Attributes: map[string]any{
+								"name": "bigtable-instance",
+								"labels": map[string]any{
+									"engine-sender": "google_app_engine_application.engine_app.name",
+								},
+							},
+						},
+					},
+				},
+			},
+			want: &resources.ResourceCollection{
+				Resources:     []resources.Resource{appEngineResource, bigtableResource},
+				Relationships: []resources.Relationship{{Source: appEngineResource, Target: bigtableResource}},
+			},
+		},
+	}
+
+	for i := range tests {
+		tc := tests[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			tr := NewTransformer(
+				tc.fields.yamlConfig,
+				tc.fields.tfConfig,
+			)
+
+			got := tr.Transform()
+
+			require.True(t, tc.want.Equal(got))
+		})
+	}
+}
+
 func TestTransformer_TransformFromDataFLowToResource(t *testing.T) {
 	type fields struct {
 		yamlConfig *config.Config
