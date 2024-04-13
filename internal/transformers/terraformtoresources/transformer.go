@@ -186,8 +186,11 @@ func (t *Transformer) getResourceByGCSName(gcs *gcpresources.ResourceGCS) (resou
 	case gcpresources.LabelPubSub:
 		resource = t.pubSubByName[gcs.Name]
 	case gcpresources.LabelPubSubSubscription:
-		pbSubLabel := t.pbSubscriptionGCSByName[gcs.Name].Label
-		resource = t.pubSubByLabel[t.pubSubByPubSubSubscriptionLabel[pbSubLabel].Label]
+		if pbs, ok := t.pbSubscriptionGCSByName[gcs.Name]; ok {
+			if pb, ok := t.pubSubByPubSubSubscriptionLabel[pbs.Label]; ok {
+				resource = t.pubSubByLabel[pb.Label]
+			}
+		}
 	case gcpresources.LabelStorage:
 		resource = t.storageByName[gcs.Name]
 	}
@@ -212,7 +215,9 @@ func (t *Transformer) getResourceByGCSLabel(gcs *gcpresources.ResourceGCS) (reso
 	case gcpresources.LabelPubSub:
 		resource = t.pubSubByLabel[gcs.Label]
 	case gcpresources.LabelPubSubSubscription:
-		resource = t.pubSubByLabel[t.pubSubByPubSubSubscriptionLabel[gcs.Label].Label]
+		if pb, ok := t.pubSubByPubSubSubscriptionLabel[gcs.Label]; ok {
+			resource = t.pubSubByLabel[pb.Label]
+		}
 	case gcpresources.LabelStorage:
 		resource = t.storageByLabel[gcs.Label]
 	}
