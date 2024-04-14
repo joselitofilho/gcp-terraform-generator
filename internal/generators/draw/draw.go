@@ -12,7 +12,6 @@ import (
 
 	"github.com/joselitofilho/gcp-terraform-generator/internal/fmtcolor"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/generators/config"
-	generatorerrs "github.com/joselitofilho/gcp-terraform-generator/internal/generators/errors"
 	gcpresources "github.com/joselitofilho/gcp-terraform-generator/internal/resources"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/transformers/resourcestoyaml"
 	"github.com/joselitofilho/gcp-terraform-generator/internal/transformers/terraformtoresources"
@@ -47,7 +46,7 @@ func (d *Draw) Build() error {
 
 	yamlConfig, err := yamlParser.Parse()
 	if err != nil {
-		return fmt.Errorf("%w: %w", generatorerrs.ErrYAMLParser, err)
+		yamlConfig = &config.Config{}
 	}
 
 	tfConfig, err := hcl.Parse(d.workdirs, d.files)
@@ -92,6 +91,7 @@ func (d *Draw) Build() error {
 	for k, v := range graphviz.DefaultNodeAttrs {
 		nodeAttrs[k] = v
 	}
+
 	delete(nodeAttrs, "height")
 
 	dotConfig := graphviz.Config{Orientation: yamlConfig.Draw.Orientation, NodeAttrs: nodeAttrs}

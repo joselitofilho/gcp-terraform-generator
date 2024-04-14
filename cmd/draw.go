@@ -33,6 +33,5 @@ func init() {
 		"Path to the YAML config file. For example: ./draw.config.yaml")
 	drawCmd.Flags().StringP(flagOutput, "o", "", "Path to the output folder. For example: ./output")
 
-	_ = drawCmd.MarkFlagRequired(flagConfig)
 	_ = drawCmd.MarkFlagRequired(flagOutput)
 }
