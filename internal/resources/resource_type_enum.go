@@ -34,8 +34,16 @@ const (
 	UnknownType ResourceType = "unknown"
 )
 
-var AvailableTypes = []ResourceType{
-	AppEngine, BigQuery, BigTable, Function, Storage, Dataflow, IoTCore, PubSub}
+var AvailableTypes = []string{
+	AppEngine.String(),
+	BigQuery.String(),
+	BigTable.String(),
+	Dataflow.String(),
+	Function.String(),
+	IoTCore.String(),
+	PubSub.String(),
+	Storage.String(),
+}
 
 // String returns the string representation of a ResourceType.
 func (rt ResourceType) String() string {
