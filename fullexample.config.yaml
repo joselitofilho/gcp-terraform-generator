@@ -276,3 +276,59 @@ storages:
         # Template for the Terraform file defining the Storage resource.
         tmpl: |-
           resource "google_storage_bucket" "{{ToSnake $.Name}}_bucket" {}
+
+# Draw configurations includes graph orientation, images and filters.
+draw:
+  # The diagram's name will also serve as the name of the output file. Example: diagram.dot.
+  name: diagram
+  # Defines the direction of graph layout. See: https://graphviz.org/docs/attrs/rankdir/
+  orientation: LR
+  # Definitions of images for the available resources
+  images:
+    appengine: "assets/diagram/app_engine.svg"
+    bigtable: "assets/diagram/big_table.svg"
+    bigquery: "assets/diagram/bigquery.svg"
+    dataflow: "assets/diagram/dataflow.svg"
+    function: "assets/diagram/function.svg"
+    kinesis: "assets/diagram/kinesis_data_stream.svg"
+    iotcore: "assets/diagram/iot_core.svg"
+    pubsub: "assets/diagram/pub_sub.svg"
+    storage: "assets/diagram/storage.svg"
+  # Define replaceable texts for the diagram.
+  replaceable_texts:
+    "-text-": ""
+    "other-text": "-ot-"
+  # Filters for matching and excluding resources by name.
+  filters:
+    appengine:
+      match:
+      not_match:
+    bigtable:
+      match:
+      not_match:
+    bigquery:
+      match:
+      not_match:
+    dataflow:
+      match:
+      not_match:
+    function:
+      match:
+      not_match:
+    kinesis:
+      match:
+      not_match:
+    iotcore:
+      match:
+      not_match:
+    pubsub:
+      match:
+      not_match:
+    storage:
+      # Patterns to match
+      match:
+        - "^ProcessedName" # Match regex pattern for ProcessedLocation
+      # Patterns to exclude
+      not_match:
+        - "^ProcessedA" # Exclude regex pattern for ProcessedA
+        - "^ProcessedB" # Exclude regex pattern for ProcessedB

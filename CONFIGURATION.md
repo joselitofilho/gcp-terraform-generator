@@ -17,6 +17,7 @@ templates and specific configurations for various GCP services.
 - [**IoT Cores**](#iotcores): Configuration for IoT Core resources.
 - [**Pub Subs**](#pubsubs): Configuration for Pub/Sub resources.
 - [**Storages**](#storages): Configuration for Storage resources.
+- [**Draw**](#draw): Draw configurations.
 
 ## File Structure
 
@@ -355,6 +356,105 @@ storages:
         tmpl: |-
           resource "google_storage_bucket" "{{ToSnake $.Name}}_bucket" {}
 ```
+
+### draw
+
+Draw configurations includes graph orientation, images and filters.
+
+```yaml
+draw:
+  # The diagram's name will also serve as the name of the output file. Example: diagram.dot.
+  name: diagram
+  # Defines the direction of graph layout. See: https://graphviz.org/docs/attrs/rankdir/
+  orientation: LR
+  # Definitions of images for the available resources
+  images:
+    appengine: "assets/diagram/app_engine.svg"
+    bigtable: "assets/diagram/big_table.svg"
+    bigquery: "assets/diagram/bigquery.svg"
+    dataflow: "assets/diagram/dataflow.svg"
+    function: "assets/diagram/function.svg"
+    kinesis: "assets/diagram/kinesis_data_stream.svg"
+    iotcore: "assets/diagram/iot_core.svg"
+    pubsub: "assets/diagram/pub_sub.svg"
+    storage: "assets/diagram/storage.svg"
+  # Define replaceable texts for the diagram.
+  replaceable_texts:
+    "-text-": ""
+    "other-text": "-ot-"
+  # Filters for matching and excluding resources by name.
+  filters:
+    appengine:
+      match:
+      not_match:
+    bigtable:
+      match:
+      not_match:
+    bigquery:
+      match:
+      not_match:
+    dataflow:
+      match:
+      not_match:
+    function:
+      match:
+      not_match:
+    kinesis:
+      match:
+      not_match:
+    iotcore:
+      match:
+      not_match:
+    pubsub:
+      match:
+      not_match:
+    storage:
+      # Patterns to match
+      match:
+        - "^ProcessedName" # Match regex pattern for ProcessedLocation
+      # Patterns to exclude
+      not_match:
+        - "^ProcessedA" # Exclude regex pattern for ProcessedA
+        - "^ProcessedB" # Exclude regex pattern for ProcessedB
+```
+
+- Available resources: [internal/resources/resource_type_enum.go](internal/resources/resource_type_enum.go)
+- Recommend image size: 40px x 40px
+
+Image list of GCP provider:
+
+#### analytics
+
+| Image                                       | Resource   | Path              |
+| :-----------------------------------------: | :--------- | :---------------- |
+| ![](assets/diagram/bigquery.svg)            | bigquery   | assets/diagram/bigquery.svg |
+| ![](assets/diagram/dataflow.svg)            | dataflow   | assets/diagram/dataflow.svg |
+| ![](assets/diagram/pub_sub.svg)             | pubsub     | assets/diagram/pub_sub.svg |
+
+#### compute
+
+| Image                                       | Resource   | Path              |
+| :-----------------------------------------: | :--------- | :---------------- |
+| ![](assets/diagram/app_engine.svg)          | appengine  | assets/diagram/app_engine.svg |
+| ![](assets/diagram/function.svg)            | function   | assets/diagram/function.svg |
+
+#### database
+
+| Image                                       | Resource   | Path              |
+| :-----------------------------------------: | :--------- | :---------------- |
+| ![](assets/diagram/big_table.svg)           | bigtable   | assets/diagram/big_table.svg |
+
+#### iot
+
+| Image                                       | Resource   | Path              |
+| :-----------------------------------------: | :--------- | :---------------- |
+| ![](assets/diagram/iot_core.svg)            | iotcore    | assets/diagram/iot_core.svg |
+
+#### storage
+
+| Image                                       | Resource   | Path              |
+| :-----------------------------------------: | :--------- | :---------------- |
+| ![](assets/diagram/storage.svg)             | storage    | assets/diagram/storage.svg |
 
 ## Full example with comments
 
