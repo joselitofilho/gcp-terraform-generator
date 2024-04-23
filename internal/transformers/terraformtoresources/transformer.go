@@ -227,6 +227,32 @@ func (t *Transformer) getResourceByGCSLabel(gcs *gcpresources.ResourceGCS) (reso
 	return resource
 }
 
+func (t *Transformer) getSourceAndTargetByAttrsMapAndSuffix(
+	conf *hcl.Resource, sourceAttr, targetAttr, suffix string,
+) (sourceGCS *gcpresources.ResourceGCS, targetGCS []*gcpresources.ResourceGCS) {
+	if labels, ok := conf.Attributes[targetAttr]; ok {
+		if labelsMap, ok := labels.(map[string]any); ok {
+			sourceValue := replaceVars(conf.Attributes[sourceAttr].(string), t.tfConfig.Variables, t.tfConfig.Locals,
+				t.yamlConfig.Draw.ReplaceableTexts)
+			sourceGCS = gcpresources.ParseResourceGCS(sourceValue, conf.Labels)
+
+			for k, v := range labelsMap {
+				if strings.HasSuffix(k, suffix) {
+					if value, ok := v.(string); ok {
+						value = extractTextFromTFVar(value)
+
+						targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
+							t.yamlConfig.Draw.ReplaceableTexts)
+						targetGCS = append(targetGCS, gcpresources.ParseResourceGCS(targetValue, nil))
+					}
+				}
+			}
+		}
+	}
+
+	return
+}
+
 func (t *Transformer) hasResourceMatched(res resources.Resource, filters config.Filters) bool {
 	if res == nil {
 		return false
@@ -405,25 +431,10 @@ func (t *Transformer) processBigQueryTable(conf *hcl.Resource) {
 func (t *Transformer) processBigTable(conf *hcl.Resource) {
 	t.processResource(conf, gcpresources.BigTable, attributeName, suffixBigTable, t.bigTableByName, t.bigTableByLabel)
 
-	if labels, ok := conf.Attributes[attributeLabels]; ok {
-		if labelsMap, ok := labels.(map[string]any); ok {
-			bigTableValue := replaceVars(conf.Attributes[attributeName].(string), t.tfConfig.Variables, t.tfConfig.Locals,
-				t.yamlConfig.Draw.ReplaceableTexts)
-			bigTableGCS := gcpresources.ParseResourceGCS(bigTableValue, conf.Labels)
-
-			for k, v := range labelsMap {
-				if strings.HasSuffix(k, "sender") {
-					if value, ok := v.(string); ok {
-						value = extractTextFromTFVar(value)
-
-						targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
-							t.yamlConfig.Draw.ReplaceableTexts)
-						targetGCS := gcpresources.ParseResourceGCS(targetValue, nil)
-
-						t.relationshipsMap[targetGCS] = append(t.relationshipsMap[targetGCS], bigTableGCS)
-					}
-				}
-			}
+	bigTableGCS, targetGCSs := t.getSourceAndTargetByAttrsMapAndSuffix(conf, attributeName, attributeLabels, "sender")
+	if bigTableGCS != nil && targetGCSs != nil {
+		for _, targetGCS := range targetGCSs {
+			t.relationshipsMap[targetGCS] = append(t.relationshipsMap[targetGCS], bigTableGCS)
 		}
 	}
 }
@@ -538,26 +549,9 @@ func (t *Transformer) processIoTCoreEventNotificationConfigs(
 func (t *Transformer) processPubSub(conf *hcl.Resource) {
 	t.processResource(conf, gcpresources.PubSub, attributeName, suffixPubSub, t.pubSubByName, t.pubSubByLabel)
 
-	if labels, ok := conf.Attributes[attributeLabels]; ok {
-		if labelsMap, ok := labels.(map[string]any); ok {
-			sourceValue := replaceVars(conf.Attributes[attributeName].(string), t.tfConfig.Variables, t.tfConfig.Locals,
-				t.yamlConfig.Draw.ReplaceableTexts)
-			sourceGCS := gcpresources.ParseResourceGCS(sourceValue, conf.Labels)
-
-			for k, v := range labelsMap {
-				if strings.HasSuffix(k, "subscriber") {
-					if value, ok := v.(string); ok {
-						value = extractTextFromTFVar(value)
-
-						targetValue := replaceVars(value, t.tfConfig.Variables, t.tfConfig.Locals,
-							t.yamlConfig.Draw.ReplaceableTexts)
-						targetGCS := gcpresources.ParseResourceGCS(targetValue, nil)
-
-						t.relationshipsMap[sourceGCS] = append(t.relationshipsMap[sourceGCS], targetGCS)
-					}
-				}
-			}
-		}
+	pubSubGCS, targetGCSs := t.getSourceAndTargetByAttrsMapAndSuffix(conf, attributeName, attributeLabels, "subscriber")
+	if pubSubGCS != nil && targetGCSs != nil {
+		t.relationshipsMap[pubSubGCS] = append(t.relationshipsMap[pubSubGCS], targetGCSs...)
 	}
 }
 
