@@ -7,7 +7,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/diagram-code-generator/resources/pkg/parser/graphviz"
+	"github.com/diagram-code-generator/resources/pkg/parser/graphviz/dot"
 	hcl "github.com/joselitofilho/hcl-parser-go/pkg/parser/hcl"
 
 	"github.com/joselitofilho/gcp-terraform-generator/internal/fmtcolor"
@@ -88,17 +88,20 @@ func (d *Draw) Build() error {
 	fmtcolor.White.Println("The diagram yaml file has been generated successfully.")
 
 	nodeAttrs := make(map[string]any)
-	for k, v := range graphviz.DefaultNodeAttrs {
+	for k, v := range dot.DefaultNodeAttrs {
 		nodeAttrs[k] = v
 	}
 
 	delete(nodeAttrs, "height")
 
-	dotConfig := graphviz.Config{Orientation: yamlConfig.Draw.Orientation, NodeAttrs: nodeAttrs}
+	dotConfig := &dot.Config{
+		Direction:        yamlConfig.Draw.Direction,
+		Splines:          yamlConfig.Draw.Splines,
+		NodeAttrs:        nodeAttrs,
+		ResourceImageMap: mergeImages(DefaultResourceImageMap, yamlConfig.Draw.Images).ToStringMap(),
+	}
 
-	resourceImageMap := mergeImages(DefaultResourceImageMap, yamlConfig.Draw.Images)
-
-	dotContent := graphviz.Build(resc, resourceImageMap.ToStringMap(), dotConfig)
+	dotContent := dot.NewDotDiagram(dotConfig).Build(resc)
 
 	dotFilename := "diagram"
 	if yamlConfig.Draw.Name != "" {

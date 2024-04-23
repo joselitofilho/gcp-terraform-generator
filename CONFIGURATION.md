@@ -359,14 +359,17 @@ storages:
 
 ### draw
 
-Draw configurations includes graph orientation, images and filters.
+Draw configurations includes graph direction, images and filters.
+
 
 ```yaml
 draw:
   # The diagram's name will also serve as the name of the output file. Example: diagram.dot.
   name: diagram
   # Defines the direction of graph layout. See: https://graphviz.org/docs/attrs/rankdir/
-  orientation: LR
+  direction: LR
+  # Controls how, and if, edges are represented. See: https://graphviz.org/docs/attrs/splines/
+  splines: spline
   # Definitions of images for the available resources
   images:
     appengine: "assets/diagram/app_engine.svg"

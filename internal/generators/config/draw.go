@@ -1,6 +1,9 @@
 package config
 
-import gcpresources "github.com/joselitofilho/gcp-terraform-generator/internal/resources"
+import (
+	"github.com/diagram-code-generator/resources/pkg/parser/graphviz/dot"
+	gcpresources "github.com/joselitofilho/gcp-terraform-generator/internal/resources"
+)
 
 type Images map[gcpresources.ResourceType]string
 
@@ -17,9 +20,10 @@ func (m Images) ToStringMap() map[string]string {
 type ReplaceableTexts map[string]string
 
 type Draw struct {
-	Name             string           `yaml:"name,omitempty"`
-	Orientation      string           `yaml:"orientation,omitempty"`
-	ReplaceableTexts ReplaceableTexts `yaml:"replaceable_texts,omitempty"`
-	Images           Images           `yaml:"images,omitempty"`
-	Filters          Filters          `yaml:"filters,omitempty"`
+	Name             string               `yaml:"name,omitempty"`
+	Direction        dot.DiagramDirection `yaml:"direction,omitempty"`
+	Splines          dot.DiagramSpline    `yaml:"splines,omitempty"`
+	ReplaceableTexts ReplaceableTexts     `yaml:"replaceable_texts,omitempty"`
+	Images           Images               `yaml:"images,omitempty"`
+	Filters          Filters              `yaml:"filters,omitempty"`
 }

@@ -20,12 +20,12 @@ func ParseResourceGCS(gcs string, labels []string) *ResourceGCS {
 		gcsType, name, label = parseGCSGeneric(gcs)
 	}
 
-	if label == "" && len(labels) > 1 {
-		label = labels[1]
-	}
-
 	if gcsType == "" && len(labels) > 0 {
 		gcsType = labels[0]
+	}
+
+	if label == "" && len(labels) > 1 {
+		label = labels[1]
 	}
 
 	return &ResourceGCS{Type: gcsType, Name: name, Label: label}
